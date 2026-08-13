@@ -1,0 +1,549 @@
+{
+  "generatedAt": "2026-08-13T04:30:01.041Z",
+  "implementationPresent": false,
+  "implementationNote": "no implementation at /home/admin_dreva_altostrat_com/l200/ported/index.js: Cannot find module '/home/admin_dreva_altostrat_com/l200/ported/index.js' imported from /home/admin_dreva_altostrat_com/l200/dist/harness/run_conformance.js",
+  "ladder": {
+    "total": 51,
+    "passed": 0,
+    "rate": 0,
+    "byTier": [
+      {
+        "tier": 1,
+        "total": 8,
+        "passed": 0
+      },
+      {
+        "tier": 2,
+        "total": 10,
+        "passed": 0
+      },
+      {
+        "tier": 3,
+        "total": 11,
+        "passed": 0
+      },
+      {
+        "tier": 4,
+        "total": 7,
+        "passed": 0
+      },
+      {
+        "tier": 5,
+        "total": 8,
+        "passed": 0
+      },
+      {
+        "tier": 6,
+        "total": 7,
+        "passed": 0
+      }
+    ],
+    "failures": [
+      {
+        "tier": 1,
+        "name": "empty program",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 1,
+        "name": "comment only",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 1,
+        "name": "int literal",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 1,
+        "name": "negative int",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 1,
+        "name": "string literal",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 1,
+        "name": "bool literals",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 1,
+        "name": "none literal",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 1,
+        "name": "multiple bindings",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 2,
+        "name": "addition",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 2,
+        "name": "operator precedence",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 2,
+        "name": "parenthesised",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 2,
+        "name": "floor division",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 2,
+        "name": "modulo",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 2,
+        "name": "bigint beyond 2^53",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 2,
+        "name": "comparison",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 2,
+        "name": "equality",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 2,
+        "name": "boolean ops",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 2,
+        "name": "not",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 3,
+        "name": "list literal",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 3,
+        "name": "empty list",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 3,
+        "name": "list index",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 3,
+        "name": "tuple literal",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 3,
+        "name": "tuple is not list",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 3,
+        "name": "dict literal",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 3,
+        "name": "dict index",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 3,
+        "name": "string index",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 3,
+        "name": "list slice",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 3,
+        "name": "in operator",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 3,
+        "name": "len builtin",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 4,
+        "name": "if true branch",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 4,
+        "name": "if false branch",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 4,
+        "name": "elif chain",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 4,
+        "name": "for loop accumulate",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 4,
+        "name": "for over range",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 4,
+        "name": "break",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 4,
+        "name": "continue",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 5,
+        "name": "def and call",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 5,
+        "name": "positional args",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 5,
+        "name": "default args",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 5,
+        "name": "keyword args",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 5,
+        "name": "recursion",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 5,
+        "name": "closure over global",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 5,
+        "name": "lambda",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 5,
+        "name": "list comprehension",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 6,
+        "name": "call predeclared native fn",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 6,
+        "name": "native module member access",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 6,
+        "name": "fail() halts",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 6,
+        "name": "undefined name errors",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 6,
+        "name": "type error on bad add",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 6,
+        "name": "string % formatting",
+        "ok": false,
+        "detail": "no implementation"
+      },
+      {
+        "tier": 6,
+        "name": "type builtin",
+        "ok": false,
+        "detail": "no implementation"
+      }
+    ]
+  },
+  "conformance": {
+    "filesTotal": 22,
+    "filesPassed": 0,
+    "assertionsTotal": 0,
+    "assertionsPassed": 0,
+    "rate": 0,
+    "files": [
+      {
+        "file": "assign.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "benchmark.star",
+        "status": "deferred",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "failures": []
+      },
+      {
+        "file": "bool.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "builtins.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "bytes.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "control.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "dict.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "float.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "function.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "function_param.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "int.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "json.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "list.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "math.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "misc.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "module.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "paths.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "proto.star",
+        "status": "deferred",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "failures": []
+      },
+      {
+        "file": "recursion.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "set.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "string.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "time.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "tuple.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      },
+      {
+        "file": "while.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "no implementation",
+        "failures": []
+      }
+    ]
+  }
+}

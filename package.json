@@ -1,0 +1,19 @@
+{
+  "name": "starport-harness",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Conformance harness and build tooling for the ported Starlark interpreter",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "conformance": "npm run build && node dist/harness/run_conformance.js",
+    "selftest": "npm run build && node dist/harness/selftest/run_selftest.js",
+    "report": "python3 harness/report.py",
+    "gap": "python3 harness/report.py --json"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+
+    // The port must survive strict mode. Loosening any of this weakens tsc as a verifier,
+    // which the Phase 0 spike measured at 0.7s against 113s of generation -- it is the
+    // cheapest signal available and must not be blunted.
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": false,
+
+    "outDir": "dist",
+    "rootDir": ".",
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": false,
+    "sourceMap": true
+  },
+  "include": ["harness/**/*.ts", "ported/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
