@@ -27,9 +27,12 @@ import shutil
 import subprocess
 from typing import Any
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
-UPSTREAM = ROOT / "vendor" / "starlark-go"
-PORTED = ROOT / "ported"
+from ..config import ROOT, TARGET
+
+# Bound from the port target rather than hard-coded, so retargeting the agent to a
+# different project is a change to app/config.py alone.
+UPSTREAM = TARGET.upstream_dir
+PORTED = TARGET.output_dir
 
 # Snapshot of the highest-scoring port seen so far, plus the report that scored it.
 # ported/ is gitignored, so without this a bad edit is unrecoverable -- which happened
@@ -99,7 +102,7 @@ def restore_best_port() -> dict[str, Any]:
     assertions, probes = _score(best)
     return {
         "status": "ok",
-        "files_restored": len(list(PORTED.rglob("*.ts"))),
+        "files_restored": len(list(PORTED.rglob(f"*{TARGET.output_suffix}"))),
         "score": {"assertions": assertions, "probes": probes},
         "recovery_hint": "Re-run verify_ported_interpreter to confirm, then retry in smaller steps.",
     }
@@ -145,7 +148,7 @@ def list_upstream_go_modules() -> dict[str, Any]:
         )
 
     modules = []
-    for path in sorted(UPSTREAM.rglob("*.go")):
+    for path in sorted(UPSTREAM.rglob(TARGET.source_glob)):
         text = path.read_text(encoding="utf-8", errors="replace")
         modules.append(
             {
@@ -190,7 +193,7 @@ def read_upstream_go_source(module_path: str) -> dict[str, Any]:
         )
 
     if not candidate.is_file():
-        available = sorted(str(p.relative_to(UPSTREAM)) for p in UPSTREAM.rglob("*.go"))
+        available = sorted(str(p.relative_to(UPSTREAM)) for p in UPSTREAM.rglob(TARGET.source_glob))
         stem = pathlib.Path(module_path).stem
         near = [p for p in available if stem and stem in p]
         return _error(
@@ -240,11 +243,11 @@ def write_ported_typescript_module(relative_path: str, source_code: str) -> dict
             "Write only inside ported/. Never modify the harness, the vendored suite, or the agent.",
         )
 
-    if not relative_path.endswith(".ts"):
+    if not relative_path.endswith(TARGET.output_suffix):
         return _error(
             "bad_extension",
-            f"{relative_path!r} is not a TypeScript file.",
-            "Use a path ending in '.ts', for example 'index.ts'.",
+            f"{relative_path!r} is not a {TARGET.target_language} file.",
+            f"Use a path ending in '{TARGET.output_suffix}', for example '{TARGET.entry_module}'.",
         )
 
     if not source_code.strip():
@@ -352,7 +355,7 @@ def read_ported_typescript_module(relative_path: str) -> dict[str, Any]:
         )
     if not target.is_file():
         existing = (
-            sorted(str(p.relative_to(PORTED)) for p in PORTED.rglob("*.ts"))
+            sorted(str(p.relative_to(PORTED)) for p in PORTED.rglob(f"*{TARGET.output_suffix}"))
             if PORTED.exists()
             else []
         )
