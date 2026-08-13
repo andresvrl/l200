@@ -107,16 +107,38 @@ tax on every call.
 Nothing below is an estimate.
 
 ```
-  conformance     358 assertions passing, of 482 reached      (suite total 2,136)
+  conformance     359 assertions passing, of 484 reached      (suite total 2,136)
   files           1 of 22 conformance files fully clean
   ladder          49 of 51 tier-0 probes, highest clean tier 5
-  port            8 TypeScript modules, ~3,700 lines, gitignored
-  tests           123 deterministic unit tests, zero model calls
+  port            9 TypeScript modules, gitignored
+  tests           127 deterministic unit tests, zero model calls
   cycle time      generation ~99% of it; tsc is 0.7 s
 ```
 
 Reproduce with `npm run conformance && python3 harness/report.py`. Snapshots in `reports/`
 are committed as evidence.
+
+### One increment, observed
+
+A real run through the graph, from the structured logs:
+
+```
+  porter  read eval.ts
+  porter  write time.ts                              <20628 chars>
+  porter  edit eval.ts  ×7                           targeted fragments, not rewrites
+  porter  verify        ──► 359 assertions, 49 probes, 1655 ms
+  porter  write time.ts  again, wholesale
+          └─ *** suspended: awaiting human approval ***
+```
+
+The last line is the design working. `time.ts` had just entered the best snapshot, so
+overwriting it stopped for a person — while the first write of the same file, when it was
+new, went straight through.
+
+That run also found two defects the tests had missed: `add_memory` is a coroutine and was
+never awaited, so memory silently never arrived; and the guardrail scanned `source_code`
+for protected paths, which would have refused a module carrying `// see ../syntax/scan.go`
+in a comment. Both fixed, both now tested.
 
 ### Things that were wrong, and how we found out
 
