@@ -13,7 +13,18 @@
  */
 
 import { Tuple, type StarlarkValue } from "../contract.js";
-import { starlarkEquals } from "../assert_shim.js";
+import { starlarkEquals, starlarkRepr } from "../assert_shim.js";
+
+/** Names the runtime shape of a value, so type confusion is obvious in a diagnostic. */
+function typeName(v: StarlarkValue): string {
+  if (v === null || v === undefined) return "None";
+  if (v instanceof Tuple) return "Tuple";
+  if (Array.isArray(v)) return "list";
+  if (v instanceof Map) return "dict";
+  if (v instanceof Set) return "set";
+  if (v instanceof Uint8Array) return "bytes";
+  return typeof v;
+}
 
 export interface Probe {
   /** Ordering key: lower tiers must work before higher ones can. */
@@ -147,7 +158,14 @@ export function checkProbe(
   for (const [key, want] of Object.entries(probe.expect ?? {})) {
     const got = globals[key];
     if (!starlarkEquals(got, want)) {
-      return { ok: false, detail: `${key}: expected ${String(want)}, got ${String(got)}` };
+      // Rendered with starlarkRepr, not String(): String(new Tuple([1n,2n])) is
+      // "[object Object]", which tells the agent nothing about what went wrong.
+      return {
+        ok: false,
+        detail:
+          `${key}: expected ${starlarkRepr(want)} (${typeName(want)}), ` +
+          `got ${starlarkRepr(got)} (${typeName(got)})`,
+      };
     }
   }
   return { ok: true };

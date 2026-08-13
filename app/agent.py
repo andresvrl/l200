@@ -13,8 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
-from zoneinfo import ZoneInfo
+"""Walking skeleton: the thinnest end-to-end port loop.
+
+Phase 1 of the plan. One agent, six tools, no memory, no routing, no guardrails --
+its only job is to prove the loop closes: read the gap report, write TypeScript, verify
+against the oracle, repair from real failures, and watch the score rise.
+
+If this does not work, the architecture is wrong and we re-scope here rather than after
+building ten steps of infrastructure on top of it.
+"""
 
 from google.adk.agents import Agent
 from google.adk.apps import App
@@ -27,41 +34,68 @@ from google.adk.plugins.bigquery_agent_analytics_plugin import (
 )
 from google.cloud import bigquery
 
+from .tools import (
+    edit_ported_typescript_module,
+    list_upstream_go_modules,
+    read_ported_typescript_module,
+    read_upstream_go_source,
+    verify_ported_interpreter,
+    write_ported_typescript_module,
+)
+
 
 MODEL = "gemini-3.6-flash"
 
 
-def get_weather(query: str) -> str:
-    """Simulates a web search. Use it get information on weather.
+SKELETON_INSTRUCTION = """\
+You port the Starlark interpreter from Go to TypeScript, one increment at a time, guided
+by an executable conformance oracle.
 
-    Args:
-        query: A string containing the location to get weather information for.
+# How you work
 
-    Returns:
-        A string with the simulated weather information for the queried location.
-    """
-    if "sf" in query.lower() or "san francisco" in query.lower():
-        return "It's 60 degrees and foggy."
-    return "It's 90 degrees and sunny."
+1. Call `verify_ported_interpreter` FIRST, every session. It tells you the measured state
+   and what to do next. Never guess at what is failing.
+2. Work only on `immediate_work` -- the failing probes in the lowest incomplete tier.
+   Tiers build on each other, so a later tier passing while an earlier one fails is an
+   accident, not progress.
+3. Read the relevant Go source before porting semantics you are unsure of. Upstream is the
+   specification.
+4. For a NEW module use `write_ported_typescript_module`. For any change to an existing
+   module use `read_ported_typescript_module` then `edit_ported_typescript_module` --
+   rewriting a whole file to fix a few lines is slow and regularly regresses code that was
+   already correct. Verify immediately after either; type checking takes under a second
+   while generation takes minutes, so never batch writes before verifying.
+5. Repeat until the target tier passes, or until you have made three consecutive attempts
+   with no improvement -- at which point stop and report precisely what is blocking you.
 
+# Non-negotiables
 
-def get_current_time(query: str) -> str:
-    """Simulates getting the current time for a city.
+- `ported/index.ts` MUST export `execFile(filename, src, predeclared, thread)` and return
+  the module's global bindings. This is defined in `harness/contract.ts`.
+- Starlark integers are ARBITRARY PRECISION. Represent them as TypeScript `bigint`, never
+  `number`. Using `number` passes early tests and fails later ones, which is the worst
+  possible failure mode.
+- Go strings are BYTE sequences; TypeScript strings are UTF-16. Where upstream operates on
+  bytes, use `Uint8Array` and handle the encoding explicitly.
+- Value mapping is fixed by the contract: None -> null, bool -> boolean, int -> bigint,
+  float -> number, string -> string, bytes -> Uint8Array, list -> array, tuple -> Tuple,
+  dict -> Map, set -> Set.
+- Relative imports MUST carry an explicit `.js` extension, because the output runs under
+  Node's ESM loader: write `from "./eval.js"`, never `from "./eval"`. The compiler enforces
+  this, and getting it wrong means the port type-checks but fails to load, scoring zero
+  everywhere with no obvious cause.
+- Error message text is observable behaviour. Upstream tests assert on it, so preserve it.
+- You may write ONLY inside `ported/`. Never modify the harness, the vendored conformance
+  suite, or the agent itself. If a conformance test looks wrong, the port is wrong.
+- The code must type-check under `strict` with `noUncheckedIndexedAccess`. Do not weaken
+  the TypeScript configuration; the type checker is the cheapest verifier available.
 
-    Args:
-        city: The name of the city to get the current time for.
+# Reporting
 
-    Returns:
-        A string with the current time information.
-    """
-    if "sf" in query.lower() or "san francisco" in query.lower():
-        tz_identifier = "America/Los_Angeles"
-    else:
-        return f"Sorry, I don't have timezone information for query: {query}."
-
-    tz = ZoneInfo(tz_identifier)
-    now = datetime.datetime.now(tz)
-    return f"The current time for query {query} is {now.strftime('%Y-%m-%d %H:%M:%S %Z%z')}"
+When you stop, state the measured numbers -- probes passed, tiers clean, assertions earned
+-- and what the next increment should be. Do not describe the port as working unless the
+oracle says so.
+"""
 
 
 root_agent = Agent(
@@ -70,8 +104,15 @@ root_agent = Agent(
         model=MODEL,
         retry_options=types.HttpRetryOptions(attempts=3),
     ),
-    instruction="You are a helpful AI assistant designed to provide accurate and useful information.",
-    tools=[get_weather, get_current_time],
+    instruction=SKELETON_INSTRUCTION,
+    tools=[
+        verify_ported_interpreter,
+        list_upstream_go_modules,
+        read_upstream_go_source,
+        write_ported_typescript_module,
+        read_ported_typescript_module,
+        edit_ported_typescript_module,
+    ],
 )
 import os
 

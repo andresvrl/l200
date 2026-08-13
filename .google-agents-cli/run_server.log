@@ -1,0 +1,30 @@
+=== Starting server at 2026-08-13T04:42:16.809681+00:00 ===
+Command: uv run uvicorn app.fast_api_app:app --host 127.0.0.1 --port 18080
+CWD: /home/admin_dreva_altostrat_com/l200
+=== Started server process 107964 ===
+/home/admin_dreva_altostrat_com/l200/.venv/lib/python3.12/site-packages/google/adk/cli/fast_api.py:567: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/admin_dreva_altostrat_com/l200/.venv/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+INFO:     Started server process [107967]
+INFO:     Waiting for application startup.
+/home/admin_dreva_altostrat_com/l200/app/app_utils/a2a.py:169: UserWarning: [EXPERIMENTAL] AgentCardBuilder: ADK Implementation for A2A support (A2aAgentExecutor, RemoteA2aAgent and corresponding supporting components etc.) is in experimental mode and is subject to breaking changes. A2A protocol and SDK are themselves not experimental. Once it's stable enough the experimental mode will be removed. Your feedback is welcome.
+  agent_card = await AgentCardBuilder(
+/home/admin_dreva_altostrat_com/l200/app/app_utils/a2a.py:177: UserWarning: [EXPERIMENTAL] A2aAgentExecutor: ADK Implementation for A2A support (A2aAgentExecutor, RemoteA2aAgent and corresponding supporting components etc.) is in experimental mode and is subject to breaking changes. A2A protocol and SDK are themselves not experimental. Once it's stable enough the experimental mode will be removed. Your feedback is welcome.
+  agent_executor=A2aAgentExecutor(runner=runner),
+/home/admin_dreva_altostrat_com/l200/.venv/lib/python3.12/site-packages/google/adk/a2a/executor/a2a_agent_executor.py:76: UserWarning: [EXPERIMENTAL] A2aAgentExecutorConfig: ADK Implementation for A2A support (A2aAgentExecutor, RemoteA2aAgent and corresponding supporting components etc.) is in experimental mode and is subject to breaking changes. A2A protocol and SDK are themselves not experimental. Once it's stable enough the experimental mode will be removed. Your feedback is welcome.
+  self._config = config or A2aAgentExecutorConfig()
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:18080 (Press CTRL+C to quit)
+INFO:     127.0.0.1:48136 - "GET / HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:48148 - "GET /dev-ui/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48162 - "POST /apps/app/users/cli-user/sessions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48166 - "POST /run_sse HTTP/1.1" 200 OK
+/home/admin_dreva_altostrat_com/l200/.venv/lib/python3.12/site-packages/google/adk/models/llm_request.py:273: UserWarning: [EXPERIMENTAL] feature FeatureName.JSON_SCHEMA_FOR_FUNC_DECL is enabled.
+  declaration = tool._get_declaration()
+Root node root_agent was cancelled.
+INFO:     127.0.0.1:54442 - "POST /apps/app/users/cli-user/sessions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54458 - "POST /run_sse HTTP/1.1" 200 OK
+Root node root_agent was cancelled.
+INFO:     127.0.0.1:51792 - "POST /apps/app/users/cli-user/sessions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51794 - "POST /run_sse HTTP/1.1" 200 OK

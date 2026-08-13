@@ -2,8 +2,14 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022"],
-    "module": "ES2022",
-    "moduleResolution": "bundler",
+
+    // nodenext, NOT bundler. Under "bundler", extensionless relative imports type-check
+    // and then fail at runtime under Node's ESM loader -- which is exactly backwards: the
+    // 0.7s verifier passes and the expensive one catches it. The walking skeleton hit this
+    // immediately (`Cannot find module dist/ported/eval`). nodenext makes tsc require the
+    // explicit .js extension, moving the error to the cheapest possible signal.
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "types": ["node"],
 
     // The port must survive strict mode. Loosening any of this weakens tsc as a verifier,

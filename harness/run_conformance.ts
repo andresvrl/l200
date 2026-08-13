@@ -213,7 +213,9 @@ function runConformance(interp: Interpreter | null): Report["conformance"] {
 }
 
 async function main(): Promise<void> {
-  const implPath = argValue("--impl") ?? join(ROOT, "ported", "index.js");
+  // The port is authored as ported/*.ts and compiled to dist/ported/*.js, so the default
+  // points at the build output rather than the source tree.
+  const implPath = argValue("--impl") ?? join(ROOT, "dist", "ported", "index.js");
   const { interp, note } = await loadInterpreter(implPath);
 
   const report: Report = {

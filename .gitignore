@@ -32,3 +32,6 @@ dist/
 .DS_Store
 .idea/
 .vscode/
+
+# Upstream source under port — fetched by scripts/fetch_upstream.py, not committed
+vendor/starlark-go/

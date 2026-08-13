@@ -107,6 +107,10 @@ def build_gap_report(report: dict[str, Any]) -> dict[str, Any]:
 
     return {
         "implementationPresent": report["implementationPresent"],
+        # The note carries the actual load failure (e.g. an unresolvable import). Without
+        # it the agent sees "0 probes" with no cause and cannot act -- observed during the
+        # walking-skeleton run, where it looped blind against a missing .js extension.
+        "implementationNote": report.get("implementationNote"),
         "ladder": {
             "highestCleanTier": clean_tier,
             "nextTier": next_tier,
