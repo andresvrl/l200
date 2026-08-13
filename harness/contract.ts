@@ -35,17 +35,37 @@ export type StarlarkValue = unknown;
 /**
  * A builtin implemented in TypeScript.
  *
- * Positional and keyword arguments are passed separately rather than merged, because
- * Starlark distinguishes them and `assert.true(cond, msg="...")` depends on it.
+ * CALLING CONVENTION -- the port must call these as `fn(args, kwargs)`, passing an ARRAY
+ * of positional arguments and an OBJECT of keyword arguments. Do NOT spread positionally
+ * (`fn(...args)`): the shim receives the array as its first parameter and a spread call
+ * hands it a bare value instead, failing with "args is not iterable".
+ *
+ * They are separate rather than merged because Starlark distinguishes positional from
+ * keyword arguments, and `assert.true(cond, msg="...")` depends on the distinction.
  */
 export type NativeFn = (
   args: StarlarkValue[],
   kwargs: Record<string, StarlarkValue>,
 ) => StarlarkValue;
 
-/** A frozen sequence. Distinct from `list` because Starlark distinguishes them. */
+/**
+ * A frozen sequence. Distinct from `list` because Starlark distinguishes them.
+ *
+ * Iterable and length-bearing on purpose: Starlark tuples are sequences, and argument
+ * handling in the port naturally does `[...args]` and `args.length`. Without these the
+ * port compiles and then fails at run time with "args is not iterable" -- which cost 228
+ * assertions once before this was added.
+ */
 export class Tuple {
   constructor(readonly items: readonly StarlarkValue[]) {}
+
+  [Symbol.iterator](): Iterator<StarlarkValue> {
+    return this.items[Symbol.iterator]();
+  }
+
+  get length(): number {
+    return this.items.length;
+  }
 }
 
 /** A named namespace of members, as produced by Starlark's `module()` builtin. */

@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import shutil
 import subprocess
 from typing import Any
 
@@ -30,10 +31,73 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 UPSTREAM = ROOT / "vendor" / "starlark-go"
 PORTED = ROOT / "ported"
 
+# Snapshot of the highest-scoring port seen so far, plus the report that scored it.
+# ported/ is gitignored, so without this a bad edit is unrecoverable -- which happened
+# once: a local tuple fix cost 228 assertions and the good version was simply gone.
+BEST_DIR = ROOT / ".port-best"
+BEST_REPORT = ROOT / "reports" / "best.json"
+
 # Generation is ~99% of the port cycle (docs/spike.md Q2), so verification timeouts are
 # generous by comparison -- a slow verify is never the bottleneck worth optimising.
 BUILD_TIMEOUT_S = 300
 VERIFY_TIMEOUT_S = 300
+
+
+def _score(report: dict[str, Any]) -> tuple[int, int]:
+    """Ranks a run: conformance assertions first, ladder probes as the tie-break.
+
+    Upstream assertions outrank our own probes because only upstream establishes
+    conformance -- the ladder is a progress signal we wrote ourselves.
+    """
+    return (report["conformance"]["assertionsPassed"], report["ladder"]["passed"])
+
+
+def _snapshot_if_best(report: dict[str, Any]) -> bool:
+    """Keeps a copy of the best port seen so far. Returns True if this run is the new best."""
+    if BEST_REPORT.exists():
+        previous = json.loads(BEST_REPORT.read_text())
+        if _score(report) <= _score(previous):
+            return False
+
+    if BEST_DIR.exists():
+        shutil.rmtree(BEST_DIR)
+    shutil.copytree(PORTED, BEST_DIR)
+    BEST_REPORT.parent.mkdir(parents=True, exist_ok=True)
+    BEST_REPORT.write_text(json.dumps(report, indent=2))
+    return True
+
+
+def restore_best_port() -> dict[str, Any]:
+    """Restores the highest-scoring version of the port recorded so far.
+
+    Use this after a change makes things worse and the cause is not obvious. Reverting to
+    known-good and retrying a smaller step beats debugging a port that has regressed in
+    several places at once.
+
+    Returns:
+        On success, a dict with ``status`` "ok", ``files_restored``, and the ``score`` that
+        snapshot achieved. On failure, a dict with ``status`` "error" and a
+        ``recovery_hint``.
+    """
+    if not BEST_DIR.exists() or not BEST_REPORT.exists():
+        return _error(
+            "no_snapshot",
+            "No known-good snapshot has been recorded yet.",
+            "Snapshots are taken automatically whenever verify_ported_interpreter finds a "
+            "new best score. Keep working and one will appear.",
+        )
+
+    if PORTED.exists():
+        shutil.rmtree(PORTED)
+    shutil.copytree(BEST_DIR, PORTED)
+    best = json.loads(BEST_REPORT.read_text())
+    assertions, probes = _score(best)
+    return {
+        "status": "ok",
+        "files_restored": len(list(PORTED.rglob("*.ts"))),
+        "score": {"assertions": assertions, "probes": probes},
+        "recovery_hint": "Re-run verify_ported_interpreter to confirm, then retry in smaller steps.",
+    }
 
 
 def _error(code: str, message: str, recovery_hint: str, **extra: Any) -> dict[str, Any]:
@@ -379,6 +443,21 @@ def verify_ported_interpreter() -> dict[str, Any]:
         "conformance_blockers": report["conformanceBlockers"],
         "ranked_files": report["rankedFiles"],
     }
+
+    # Snapshot the best port automatically, and warn loudly when a change lost ground --
+    # a local win with a global blast radius is the failure mode this catches.
+    is_best = _snapshot_if_best(report)
+    result["is_best_so_far"] = is_best
+    if not is_best and BEST_REPORT.exists():
+        best = json.loads(BEST_REPORT.read_text())
+        best_a, best_p = _score(best)
+        now_a, now_p = _score(report)
+        if now_a < best_a:
+            result["regression_warning"] = (
+                f"This version earns {now_a} assertions; the best recorded is {best_a} "
+                f"({best_a - now_a} lost). Consider restore_best_port and a smaller step."
+            )
+    return result
 
     # Type checking can pass while the module still fails to LOAD -- most often an import
     # that Node's ESM loader cannot resolve. Surfacing the loader's own message is the

@@ -199,12 +199,12 @@ export function createAssertShim(
 
   // --- host builtins that assert.star documents as predeclared ---
 
-  const error: NativeFn = (args) => {
+  const error: NativeFn = (args = []) => {
     fail(args.map((a) => (typeof a === "string" ? a : starlarkRepr(a))).join(" "));
     return null; // non-halting, by design
   };
 
-  const catchFn: NativeFn = (args) => {
+  const catchFn: NativeFn = (args = []) => {
     try {
       callFn(args[0], []);
       return null;
@@ -213,7 +213,7 @@ export function createAssertShim(
     }
   };
 
-  const matches: NativeFn = (args) => {
+  const matches: NativeFn = (args = []) => {
     const [pattern, str] = args as [string, string];
     try {
       return new RegExp(pattern).test(str);
@@ -222,32 +222,32 @@ export function createAssertShim(
     }
   };
 
-  const moduleFn: NativeFn = (args, kwargs) => {
+  const moduleFn: NativeFn = (args = [], kwargs = {}) => {
     const name = typeof args[0] === "string" ? args[0] : "module";
     return { __starlarkModule__: name, members: { ...kwargs } } satisfies NativeModule;
   };
 
-  const freeze: NativeFn = (args) => args[0];
+  const freeze: NativeFn = (args = []) => args[0];
 
-  const floatEqFn: NativeFn = (args) => floatEq(Number(args[0]), Number(args[1]));
+  const floatEqFn: NativeFn = (args = []) => floatEq(Number(args[0]), Number(args[1]));
 
   // --- the assert module, mirroring starlarktest/assert.star ---
 
-  const eq: NativeFn = (args) => {
+  const eq: NativeFn = (args = []) => {
     const [x, y] = args;
     if (starlarkEquals(x, y)) ok();
     else fail(`${starlarkRepr(x)} != ${starlarkRepr(y)}`);
     return null;
   };
 
-  const ne: NativeFn = (args) => {
+  const ne: NativeFn = (args = []) => {
     const [x, y] = args;
     if (!starlarkEquals(x, y)) ok();
     else fail(`${starlarkRepr(x)} == ${starlarkRepr(y)}`);
     return null;
   };
 
-  const isTrue: NativeFn = (args, kwargs) => {
+  const isTrue: NativeFn = (args = [], kwargs = {}) => {
     const cond = args[0];
     const msg = (args[1] ?? kwargs["msg"] ?? "assertion failed") as string;
     // Starlark truthiness: None, False, 0, "", and empty containers are falsy.
@@ -266,7 +266,7 @@ export function createAssertShim(
     return null;
   };
 
-  const lt: NativeFn = (args) => {
+  const lt: NativeFn = (args = []) => {
     const [x, y] = args;
     try {
       if (starlarkLess(x, y)) ok();
@@ -277,7 +277,7 @@ export function createAssertShim(
     return null;
   };
 
-  const contains: NativeFn = (args) => {
+  const contains: NativeFn = (args = []) => {
     const [x, y] = args;
     try {
       if (starlarkContains(x, y)) ok();
@@ -288,7 +288,7 @@ export function createAssertShim(
     return null;
   };
 
-  const fails: NativeFn = (args) => {
+  const fails: NativeFn = (args = []) => {
     const [fn, pattern] = args as [StarlarkValue, string];
     let msg: string | null = null;
     try {

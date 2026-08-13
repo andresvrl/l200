@@ -38,3 +38,6 @@ vendor/starlark-go/
 
 # agents-cli local run artifacts
 .google-agents-cli/
+
+# Snapshot of the best-scoring port (recovery only, regenerated automatically)
+.port-best/

@@ -19,6 +19,7 @@ from .port_tools import (
     list_upstream_go_modules,
     read_ported_typescript_module,
     read_upstream_go_source,
+    restore_best_port,
     verify_ported_interpreter,
     write_ported_typescript_module,
 )
@@ -28,6 +29,7 @@ __all__ = [
     "list_upstream_go_modules",
     "read_ported_typescript_module",
     "read_upstream_go_source",
+    "restore_best_port",
     "verify_ported_interpreter",
     "write_ported_typescript_module",
 ]

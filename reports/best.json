@@ -1,0 +1,199 @@
+{
+  "implementationPresent": true,
+  "implementationNote": null,
+  "ladder": {
+    "highestCleanTier": 5,
+    "nextTier": 6,
+    "passed": 48,
+    "total": 51
+  },
+  "conformance": {
+    "assertionsPassed": 5,
+    "assertionsSeen": 22,
+    "filesPassed": 0,
+    "filesTotal": 22
+  },
+  "immediateWork": [
+    {
+      "tier": 6,
+      "name": "call predeclared native fn",
+      "ok": false,
+      "detail": "threw: Cannot mix BigInt and other types, use explicit conversions"
+    },
+    {
+      "tier": 6,
+      "name": "fail() halts",
+      "ok": false,
+      "detail": "error \"undefined: fail\" did not match /boom/"
+    },
+    {
+      "tier": 6,
+      "name": "string % formatting",
+      "ok": false,
+      "detail": "threw: probe:string % formatting:1:13: unknown or unsupported binary op % for string and tuple"
+    }
+  ],
+  "conformanceBlockers": [
+    {
+      "signature": "got NEWLINE, want primary expression",
+      "filesBlocked": 6,
+      "assertionsBlocked": 451,
+      "examples": [
+        {
+          "file": "assign.star",
+          "error": "assign.star:16:4: got NEWLINE, want primary expression"
+        },
+        {
+          "file": "builtins.star",
+          "error": "builtins.star:232:4: got NEWLINE, want primary expression"
+        },
+        {
+          "file": "dict.star",
+          "error": "dict.star:220:4: got NEWLINE, want primary expression"
+        }
+      ]
+    },
+    {
+      "signature": "Cannot read properties of undefined (reading 'msg')",
+      "filesBlocked": 3,
+      "assertionsBlocked": 377,
+      "examples": [
+        {
+          "file": "bool.star",
+          "error": "Cannot read properties of undefined (reading 'msg')"
+        },
+        {
+          "file": "control.star",
+          "error": "Cannot read properties of undefined (reading 'msg')"
+        },
+        {
+          "file": "float.star",
+          "error": "Cannot read properties of undefined (reading 'msg')"
+        }
+      ]
+    },
+    {
+      "signature": "unpack mismatch: got 0, want 2",
+      "filesBlocked": 1,
+      "assertionsBlocked": 327,
+      "examples": [
+        {
+          "file": "math.star",
+          "error": "math.star:9:1: unpack mismatch: got 0, want 2"
+        }
+      ]
+    },
+    {
+      "signature": "args is not iterable",
+      "filesBlocked": 5,
+      "assertionsBlocked": 221,
+      "examples": [
+        {
+          "file": "int.star",
+          "error": "args is not iterable"
+        },
+        {
+          "file": "module.star",
+          "error": "args is not iterable"
+        },
+        {
+          "file": "recursion.star",
+          "error": "args is not iterable"
+        }
+      ]
+    },
+    {
+      "signature": "object has no attribute .<attr>",
+      "filesBlocked": 1,
+      "assertionsBlocked": 90,
+      "examples": [
+        {
+          "file": "time.star",
+          "error": "time.star:6:26: object has no attribute .parse_time"
+        }
+      ]
+    }
+  ],
+  "rankedFiles": [
+    {
+      "file": "math.star",
+      "assertionsAvailable": 327,
+      "featureCost": 21,
+      "value": 15.57,
+      "status": "error",
+      "topFailures": [],
+      "error": "math.star:9:1: unpack mismatch: got 0, want 2"
+    },
+    {
+      "file": "float.star",
+      "assertionsAvailable": 327,
+      "featureCost": 44,
+      "value": 7.43,
+      "status": "error",
+      "topFailures": [
+        "\"f\" != \"l\""
+      ],
+      "error": "Cannot read properties of undefined (reading 'msg')"
+    },
+    {
+      "file": "string.star",
+      "assertionsAvailable": 340,
+      "featureCost": 50,
+      "value": 6.8,
+      "status": "partial",
+      "topFailures": [
+        "97.0 != 8.0"
+      ],
+      "error": "Cannot read properties of undefined (reading 'msg')"
+    },
+    {
+      "file": "int.star",
+      "assertionsAvailable": 174,
+      "featureCost": 36,
+      "value": 4.83,
+      "status": "error",
+      "topFailures": [],
+      "error": "args is not iterable"
+    },
+    {
+      "file": "time.star",
+      "assertionsAvailable": 90,
+      "featureCost": 23,
+      "value": 3.91,
+      "status": "error",
+      "topFailures": [],
+      "error": "time.star:6:26: object has no attribute .parse_time"
+    },
+    {
+      "file": "builtins.star",
+      "assertionsAvailable": 150,
+      "featureCost": 46,
+      "value": 3.26,
+      "status": "error",
+      "topFailures": [],
+      "error": "builtins.star:232:4: got NEWLINE, want primary expression"
+    },
+    {
+      "file": "dict.star",
+      "assertionsAvailable": 108,
+      "featureCost": 35,
+      "value": 3.09,
+      "status": "error",
+      "topFailures": [],
+      "error": "dict.star:220:4: got NEWLINE, want primary expression"
+    },
+    {
+      "file": "set.star",
+      "assertionsAvailable": 112,
+      "featureCost": 37,
+      "value": 3.03,
+      "status": "partial",
+      "topFailures": [
+        "\"s\" != \"e\"",
+        "\"s\" != \"e\"",
+        "1 != 3"
+      ],
+      "error": "args is not iterable"
+    }
+  ]
+}
