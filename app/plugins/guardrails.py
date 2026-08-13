@@ -165,28 +165,45 @@ def rewrites_a_module_that_is_already_earning(relative_path: str = "", **_: Any)
     return snapshot.is_file()
 
 
+# The two destructive tools, each behind ADK's native confirmation gate so the run
+# genuinely suspends until a person answers rather than the model asking itself.
+WRITE_TOOL = FunctionTool(
+    port_tools.write_ported_typescript_module,
+    require_confirmation=rewrites_a_module_that_is_already_earning,
+)
+RESTORE_TOOL = FunctionTool(port_tools.restore_best_port, require_confirmation=True)
+
+
+# Tools grouped by role. Each agent is given what its job needs and nothing else: a
+# planner holding a write tool will eventually use it, and then the plan and the edit
+# arrive in the same breath with no verification between them.
+MEASURE_TOOLS = [port_tools.verify_ported_interpreter]
+
+READ_UPSTREAM_TOOLS = [
+    port_tools.list_upstream_go_modules,
+    port_tools.read_upstream_go_source,
+]
+
+READ_PORT_TOOLS = [
+    port_tools.list_ported_typescript_modules,
+    port_tools.read_ported_typescript_module,
+]
+
+
 def build_tools() -> list[Any]:
-    """Assembles the tool list, wrapping the destructive ones in a confirmation gate.
+    """Every tool, in the order the agent should reach for them.
 
-    Two gates, both using ADK's native ``require_confirmation`` so the run genuinely
-    suspends until a person answers, rather than the model asking itself:
-
-    * ``restore_best_port`` always asks -- it deletes the entire working tree.
-    * ``write_ported_typescript_module`` asks only when overwriting a module that is
-      already earning score.
+    Ordering is a hint the model reads, so measurement comes first, then orientation, then
+    change. Given to the roles that both write and verify.
 
     Returns:
-        Tools in the order the agent should reach for them: measure, orient, then change.
+        The full tool list, with the destructive tools already wrapped in their gates.
     """
     return [
-        port_tools.verify_ported_interpreter,
-        port_tools.list_upstream_go_modules,
-        port_tools.read_upstream_go_source,
-        port_tools.read_ported_typescript_module,
+        *MEASURE_TOOLS,
+        *READ_UPSTREAM_TOOLS,
+        *READ_PORT_TOOLS,
         port_tools.edit_ported_typescript_module,
-        FunctionTool(
-            port_tools.write_ported_typescript_module,
-            require_confirmation=rewrites_a_module_that_is_already_earning,
-        ),
-        FunctionTool(port_tools.restore_best_port, require_confirmation=True),
+        WRITE_TOOL,
+        RESTORE_TOOL,
     ]

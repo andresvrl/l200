@@ -13,101 +13,164 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Walking skeleton: the thinnest end-to-end port loop.
+"""The port graph.
 
-Phase 1 of the plan. One agent, six tools, no memory, no routing, no guardrails --
-its only job is to prove the loop closes: read the gap report, write TypeScript, verify
-against the oracle, repair from real failures, and watch the score rise.
+::
 
-If this does not work, the architecture is wrong and we re-scope here rather than after
-building ten steps of infrastructure on top of it.
+    port_coordinator .................. talks to the human, owns the goal      [Pro]
+     └── port_increment (Sequential) ... one increment, start to finish
+          ├── planner ................. reads the gap report, picks ONE thing  [Pro]
+          ├── analysts (Parallel) ..... two independent reads
+          │    ├── upstream_analyst ... what upstream actually specifies       [Flash]
+          │    └── convention_analyst . what the existing port already does    [Flash-Lite]
+          ├── porter .................. writes the code                        [Flash]
+          └── verify_and_repair (Loop)  until the oracle stops moving
+               ├── repairer ........... fixes what the oracle reports          [Pro]
+               └── StopWhenStalled .... code, not a model, decides when to quit
+
+Why this shape rather than one capable agent:
+
+* **Separate roles because they need separate tools.** The planner has no write tool, so a
+  plan cannot silently become an edit. The analysts cannot write at all.
+* **Parallel where the work is genuinely independent.** The two analysts read different
+  corpora -- upstream Go and the existing TypeScript -- and neither needs the other's
+  output. Splitting them also keeps each context small, which is the practical form of the
+  Lost-in-the-Middle result: a long context degrades recall of material in its middle.
+* **A loop because repair is iterative, with a stopping rule that is code.** The loop
+  consumes real verifier output every round, never self-critique. Refinement improves only
+  with external information (Huang et al., ICLR 2024); a model asked to review its own work
+  produces confident revisions and no gain.
+* **Models by tier.** Bulk translation is faithful transcription and Flash does it well;
+  choosing what to port next, and repairing a failure whose cause is three modules away
+  from where it surfaced, is where the expensive tier earns its cost. See app/config.py.
 """
 
-from google.adk.agents import Agent
+import logging
+import os
+
+# ADK 2.6 marks SequentialAgent/ParallelAgent/LoopAgent as deprecated in favour of
+# google.adk.workflow.Workflow. We stay with them deliberately: the same deprecation notice
+# records that a Workflow cannot yet be a sub-agent of an LlmAgent, and a conversational
+# coordinator delegating to a pipeline is exactly this graph. Revisit when that lands.
+from google.adk.agents import LlmAgent, LoopAgent, ParallelAgent, SequentialAgent
 from google.adk.apps import App
 from google.adk.models import Gemini
-from google.genai import types
-import logging
 from google.adk.plugins.bigquery_agent_analytics_plugin import (
     BigQueryAgentAnalyticsPlugin,
     BigQueryLoggerConfig,
 )
 from google.cloud import bigquery
+from google.genai import types
 
+from .config import MAX_REPAIR_ROUNDS, MODELS
+from .escalation import StopWhenStalled
 from .plugins import GuardrailPlugin, ObservabilityPlugin, build_tools
+from .plugins.guardrails import MEASURE_TOOLS, READ_PORT_TOOLS, READ_UPSTREAM_TOOLS, WRITE_TOOL
+from .prompts import (
+    CONVENTION_ANALYST,
+    COORDINATOR,
+    PLANNER,
+    PORTER,
+    REPAIRER,
+    UPSTREAM_ANALYST,
+)
+from .tools import port_tools
 
 
-MODEL = "gemini-3.6-flash"
+def _model(name: str) -> Gemini:
+    """Builds a model client with retries.
+
+    Retries matter more here than in a chat agent: a single porter call can be several
+    minutes of generation, so losing one to a transient error is expensive.
+    """
+    return Gemini(model=name, retry_options=types.HttpRetryOptions(attempts=3))
 
 
-SKELETON_INSTRUCTION = """\
-You port the Starlark interpreter from Go to TypeScript, one increment at a time, guided
-by an executable conformance oracle.
+# --- the roles -------------------------------------------------------------------------
 
-# How you work
+planner = LlmAgent(
+    name="planner",
+    description="Reads the measured gap report and chooses the single next increment.",
+    model=_model(MODELS.planner),
+    instruction=PLANNER,
+    tools=MEASURE_TOOLS,
+    output_key="port_plan",
+)
 
-1. Call `verify_ported_interpreter` FIRST, every session. It tells you the measured state
-   and what to do next. Never guess at what is failing.
-2. Choose the next increment by VALUE, using two signals:
-   - `immediate_work` -- failing probes in the lowest incomplete ladder tier. Tiers build
-     on each other, so a later tier passing while an earlier one fails is an accident.
-   - `conformance_blockers` -- single defects grouped across upstream files, each labelled
-     with how many assertions it gates.
-   Ladder probes are our own progress signal; only the upstream `.star` suite establishes
-   conformance. So when a blocker gates hundreds of assertions, fix it before a cosmetic
-   probe, even if the probe sits in a lower tier.
-3. Read the relevant Go source before porting semantics you are unsure of. Upstream is the
-   specification.
-4. For a NEW module use `write_ported_typescript_module`. For any change to an existing
-   module use `read_ported_typescript_module` then `edit_ported_typescript_module` --
-   rewriting a whole file to fix a few lines is slow and regularly regresses code that was
-   already correct. Verify immediately after either; type checking takes under a second
-   while generation takes minutes, so never batch writes before verifying.
-5. Repeat until the target tier passes, or until you have made three consecutive attempts
-   with no improvement -- at which point stop and report precisely what is blocking you.
+upstream_analyst = LlmAgent(
+    name="upstream_analyst",
+    description="Describes the upstream surface the increment must reproduce.",
+    model=_model(MODELS.porter),
+    instruction=UPSTREAM_ANALYST,
+    tools=READ_UPSTREAM_TOOLS,
+    output_key="upstream_surface",
+)
 
-# Non-negotiables
+convention_analyst = LlmAgent(
+    name="convention_analyst",
+    description="States the conventions the existing ported code already follows.",
+    model=_model(MODELS.triager),
+    instruction=CONVENTION_ANALYST,
+    tools=READ_PORT_TOOLS,
+    output_key="port_conventions",
+)
 
-- `ported/index.ts` MUST export `execFile(filename, src, predeclared, thread)` and return
-  the module's global bindings. This is defined in `harness/contract.ts`.
-- Starlark integers are ARBITRARY PRECISION. Represent them as TypeScript `bigint`, never
-  `number`. Using `number` passes early tests and fails later ones, which is the worst
-  possible failure mode.
-- Go strings are BYTE sequences; TypeScript strings are UTF-16. Where upstream operates on
-  bytes, use `Uint8Array` and handle the encoding explicitly.
-- Value mapping is fixed by the contract: None -> null, bool -> boolean, int -> bigint,
-  float -> number, string -> string, bytes -> Uint8Array, list -> array, tuple -> Tuple,
-  dict -> Map, set -> Set.
-- Relative imports MUST carry an explicit `.js` extension, because the output runs under
-  Node's ESM loader: write `from "./eval.js"`, never `from "./eval"`. The compiler enforces
-  this, and getting it wrong means the port type-checks but fails to load, scoring zero
-  everywhere with no obvious cause.
-- Error message text is observable behaviour. Upstream tests assert on it, so preserve it.
-- You may write ONLY inside `ported/`. Never modify the harness, the vendored conformance
-  suite, or the agent itself. If a conformance test looks wrong, the port is wrong.
-- The code must type-check under `strict` with `noUncheckedIndexedAccess`. Do not weaken
-  the TypeScript configuration; the type checker is the cheapest verifier available.
+analysts = ParallelAgent(
+    name="analysts",
+    description="Reads upstream and the existing port at the same time.",
+    sub_agents=[upstream_analyst, convention_analyst],
+)
 
-# Reporting
+porter = LlmAgent(
+    name="porter",
+    description="Writes the target-language code for the planned increment.",
+    model=_model(MODELS.porter),
+    instruction=PORTER,
+    tools=[*MEASURE_TOOLS, *READ_PORT_TOOLS, port_tools.edit_ported_typescript_module, WRITE_TOOL],
+)
 
-When you stop, state the measured numbers -- probes passed, tiers clean, assertions earned
--- and what the next increment should be. Do not describe the port as working unless the
-oracle says so.
-"""
-
-
-root_agent = Agent(
-    name="root_agent",
-    model=Gemini(
-        model=MODEL,
-        retry_options=types.HttpRetryOptions(attempts=3),
-    ),
-    instruction=SKELETON_INSTRUCTION,
+repairer = LlmAgent(
+    name="repairer",
+    description="Fixes what the oracle reports, one root cause per round.",
+    model=_model(MODELS.repairer),
+    instruction=REPAIRER,
     tools=build_tools(),
 )
-import os
 
-# Initialize BigQuery Analytics
+verify_and_repair = LoopAgent(
+    name="verify_and_repair",
+    description="Repairs and re-verifies until the oracle stops improving.",
+    sub_agents=[
+        repairer,
+        # The stopping rule runs after each repair, reads the report file the oracle just
+        # wrote, and escalates when the score has not moved. See app/escalation.py.
+        StopWhenStalled(
+            name="stall_check",
+            description="Ends the loop when a round produces no measured improvement.",
+        ),
+    ],
+    max_iterations=MAX_REPAIR_ROUNDS,
+)
+
+port_increment = SequentialAgent(
+    name="port_increment",
+    description="Plans, ports, verifies and repairs one increment of the port.",
+    sub_agents=[planner, analysts, porter, verify_and_repair],
+)
+
+root_agent = LlmAgent(
+    name="port_coordinator",
+    description="Owns the port, runs one increment at a time, and reports to the human.",
+    model=_model(MODELS.planner),
+    instruction=COORDINATOR,
+    sub_agents=[port_increment],
+)
+
+
+# --- the app ---------------------------------------------------------------------------
+
+# BigQuery analytics comes from the scaffold and is optional: without a project configured
+# the agent still runs, it just has nowhere to ship session analytics.
 _plugins = []
 _project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
 _dataset_id = os.environ.get("BQ_ANALYTICS_DATASET_ID", "adk_agent_analytics")

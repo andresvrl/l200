@@ -46,11 +46,21 @@ BUILD_TIMEOUT_S = 300
 VERIFY_TIMEOUT_S = 300
 
 
-def _score(report: dict[str, Any]) -> tuple[int, int]:
+def score_report(report: dict[str, Any]) -> tuple[int, int]:
     """Ranks a run: conformance assertions first, ladder probes as the tie-break.
 
     Upstream assertions outrank our own probes because only upstream establishes
     conformance -- the ladder is a progress signal we wrote ourselves.
+
+    Public because the repair loop's stopping rule compares runs with it too. One
+    definition of "better" for the whole project, or the snapshot and the loop can
+    disagree about whether things improved.
+
+    Args:
+        report: A conformance report, as written to ``reports/conformance.json``.
+
+    Returns:
+        A tuple ordered so that ``a > b`` means run ``a`` is better than run ``b``.
     """
     return (report["conformance"]["assertionsPassed"], report["ladder"]["passed"])
 
@@ -64,7 +74,7 @@ def _snapshot_if_best(report: dict[str, Any]) -> bool:
     """
     if BEST_REPORT.exists():
         previous = json.loads(BEST_REPORT.read_text())
-        if _score(report) <= _score(previous):
+        if score_report(report) <= score_report(previous):
             return False
 
     if BEST_DIR.exists():
@@ -99,7 +109,7 @@ def restore_best_port() -> dict[str, Any]:
         shutil.rmtree(PORTED)
     shutil.copytree(BEST_DIR, PORTED)
     best = json.loads(BEST_REPORT.read_text())
-    assertions, probes = _score(best)
+    assertions, probes = score_report(best)
     return {
         "status": "ok",
         "files_restored": len(list(PORTED.rglob(f"*{TARGET.output_suffix}"))),
@@ -158,6 +168,35 @@ def list_upstream_go_modules() -> dict[str, Any]:
             }
         )
     modules.sort(key=lambda m: m["bytes"])
+    return {"status": "ok", "module_count": len(modules), "modules": modules}
+
+
+def list_ported_typescript_modules() -> dict[str, Any]:
+    """Lists the TypeScript modules written so far, with their sizes.
+
+    Use this to see what already exists before adding to it. The port is written one module
+    at a time, so without a way to look at the whole output an agent reinvents a helper
+    that is already there, with slightly different behaviour.
+
+    Returns:
+        A dict with ``status`` "ok" and ``modules``: a list of ``{"path", "bytes", "lines"}``
+        entries sorted largest first, since the biggest modules carry most of the
+        conventions. ``modules`` is empty when nothing has been ported yet.
+    """
+    if not PORTED.exists():
+        return {"status": "ok", "module_count": 0, "modules": []}
+
+    modules = []
+    for path in sorted(PORTED.rglob(f"*{TARGET.output_suffix}")):
+        text = path.read_text(encoding="utf-8", errors="replace")
+        modules.append(
+            {
+                "path": str(path.relative_to(PORTED)),
+                "bytes": len(text),
+                "lines": text.count("\n") + 1,
+            }
+        )
+    modules.sort(key=lambda m: -m["bytes"])
     return {"status": "ok", "module_count": len(modules), "modules": modules}
 
 
@@ -482,8 +521,8 @@ def verify_ported_interpreter() -> dict[str, Any]:
     result["is_best_so_far"] = is_best
     if not is_best and BEST_REPORT.exists():
         best = json.loads(BEST_REPORT.read_text())
-        best_a, _ = _score(best)
-        now_a, _ = _score(report)
+        best_a, _ = score_report(best)
+        now_a, _ = score_report(report)
         if now_a < best_a:
             result["regression_warning"] = (
                 f"This version earns {now_a} assertions; the best recorded is {best_a} "
