@@ -54,7 +54,9 @@ import os
 # coordinator delegating to a pipeline is exactly this graph. Revisit when that lands.
 from google.adk.agents import LlmAgent, LoopAgent, ParallelAgent, SequentialAgent
 from google.adk.apps import App
+from google.adk.apps._configs import EventsCompactionConfig
 from google.adk.models import Gemini
+from google.adk.tools import load_memory
 from google.adk.plugins.bigquery_agent_analytics_plugin import (
     BigQueryAgentAnalyticsPlugin,
     BigQueryLoggerConfig,
@@ -62,8 +64,9 @@ from google.adk.plugins.bigquery_agent_analytics_plugin import (
 from google.cloud import bigquery
 from google.genai import types
 
-from .config import MAX_REPAIR_ROUNDS, MODELS
+from .config import COMPACTION_INTERVAL, COMPACTION_OVERLAP, MAX_REPAIR_ROUNDS, MODELS
 from .escalation import StopWhenStalled
+from .memory import remember_port_conventions
 from .plugins import GuardrailPlugin, ObservabilityPlugin, build_tools
 from .plugins.guardrails import MEASURE_TOOLS, READ_PORT_TOOLS, READ_UPSTREAM_TOOLS, WRITE_TOOL
 from .prompts import (
@@ -111,7 +114,11 @@ convention_analyst = LlmAgent(
     description="States the conventions the existing ported code already follows.",
     model=_model(MODELS.triager),
     instruction=CONVENTION_ANALYST,
-    tools=READ_PORT_TOOLS,
+    # Reads the code AND recalls what earlier increments decided. The code shows what was
+    # written; memory carries the reasoning, which is the part that does not survive in
+    # a diff -- "int is bigint" is visible, "and here is why float comparison is separate"
+    # is not.
+    tools=[*READ_PORT_TOOLS, load_memory],
     output_key="port_conventions",
 )
 
@@ -127,6 +134,10 @@ porter = LlmAgent(
     model=_model(MODELS.porter),
     instruction=PORTER,
     tools=[*MEASURE_TOOLS, *READ_PORT_TOOLS, port_tools.edit_ported_typescript_module, WRITE_TOOL],
+    # Records what this increment established, in the background. The porter is finished by
+    # the time this runs, so awaiting a round trip to Memory Bank would add latency to
+    # every increment and change nothing about the result.
+    after_agent_callback=remember_port_conventions,
 )
 
 repairer = LlmAgent(
@@ -202,4 +213,13 @@ app = App(
     root_agent=root_agent,
     name="app",
     plugins=[ObservabilityPlugin(), GuardrailPlugin(), *_plugins],
+    # A port session grows faster than a conversation does: one repair round can carry a
+    # 20 KB module in a tool result, and the loop runs up to five of them. Compaction
+    # summarises older events so the window holds the current increment rather than the
+    # source of a module that was finished an hour ago. The overlap is what keeps it safe --
+    # a summary boundary with no shared events loses the thread across the seam.
+    events_compaction_config=EventsCompactionConfig(
+        compaction_interval=COMPACTION_INTERVAL,
+        overlap_size=COMPACTION_OVERLAP,
+    ),
 )

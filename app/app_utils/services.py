@@ -30,6 +30,7 @@ from google.adk.cli.utils.service_factory import create_session_service_from_opt
 
 SESSION_SERVICE_URI = "shared://session"
 ARTIFACT_SERVICE_URI = "shared://artifact"
+MEMORY_SERVICE_URI = "shared://memory"
 
 _AGENT_DIR = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -67,6 +68,33 @@ def get_artifact_service():
     return InMemoryArtifactService()
 
 
+@functools.cache
+def get_memory_service():
+    """Process-wide memory service: Vertex AI Memory Bank when deployed, else in-memory.
+
+    Chosen the same way as the session service above, and for the same reason: a local run
+    should need no cloud resources, while the deployed agent gets recall that outlives a
+    single session. What actually gets written is decided in ``app/memory.py``.
+    """
+    agent_engine_id = os.environ.get("GOOGLE_CLOUD_AGENT_ENGINE_ID")
+    if agent_engine_id:
+        from google.adk.memory.vertex_ai_memory_bank_service import (
+            VertexAiMemoryBankService,
+        )
+
+        return VertexAiMemoryBankService(
+            project=os.environ.get("GOOGLE_CLOUD_PROJECT"),
+            # Runtime-injected agent-engine region, not GOOGLE_CLOUD_LOCATION.
+            location=os.environ.get("GOOGLE_CLOUD_AGENT_ENGINE_LOCATION")
+            or os.environ.get("GOOGLE_CLOUD_LOCATION"),
+            agent_engine_id=agent_engine_id,
+        )
+    from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
+
+    return InMemoryMemoryService()
+
+
 _registry = get_service_registry()
 _registry.register_session_service("shared", lambda uri, **kw: get_session_service())
 _registry.register_artifact_service("shared", lambda uri, **kw: get_artifact_service())
+_registry.register_memory_service("shared", lambda uri, **kw: get_memory_service())

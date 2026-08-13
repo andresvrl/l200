@@ -197,3 +197,23 @@ STALL_LIMIT = 2
 Set low on purpose. A repair that does not move the oracle is not partial progress; it is
 evidence the diagnosis is wrong, and another round of the same diagnosis will not help.
 """
+
+
+# --- context window --------------------------------------------------------------------
+# A port session grows much faster than a conversation. A single tool result can be a 20 KB
+# module, and the repair loop produces up to MAX_REPAIR_ROUNDS of them per increment.
+
+COMPACTION_INTERVAL = 20
+"""Events between compactions.
+
+Roughly one increment's worth: plan, two analyses, a write, and a few verify/repair rounds.
+Compacting mid-increment would summarise away a failure the repairer is still working on.
+"""
+
+COMPACTION_OVERLAP = 3
+"""Events shared across a compaction boundary.
+
+Without overlap the summary starts exactly where the previous one stopped, and a fix that
+spans the seam loses the failure it was responding to. Three events is enough to carry a
+tool call, its result, and the reasoning that followed.
+"""
