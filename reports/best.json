@@ -4,22 +4,16 @@
   "ladder": {
     "highestCleanTier": 5,
     "nextTier": 6,
-    "passed": 48,
+    "passed": 49,
     "total": 51
   },
   "conformance": {
-    "assertionsPassed": 5,
-    "assertionsSeen": 22,
-    "filesPassed": 0,
+    "assertionsPassed": 261,
+    "assertionsSeen": 332,
+    "filesPassed": 1,
     "filesTotal": 22
   },
   "immediateWork": [
-    {
-      "tier": 6,
-      "name": "call predeclared native fn",
-      "ok": false,
-      "detail": "threw: Cannot mix BigInt and other types, use explicit conversions"
-    },
     {
       "tier": 6,
       "name": "fail() halts",
@@ -54,55 +48,6 @@
       ]
     },
     {
-      "signature": "Cannot read properties of undefined (reading 'msg')",
-      "filesBlocked": 3,
-      "assertionsBlocked": 377,
-      "examples": [
-        {
-          "file": "bool.star",
-          "error": "Cannot read properties of undefined (reading 'msg')"
-        },
-        {
-          "file": "control.star",
-          "error": "Cannot read properties of undefined (reading 'msg')"
-        },
-        {
-          "file": "float.star",
-          "error": "Cannot read properties of undefined (reading 'msg')"
-        }
-      ]
-    },
-    {
-      "signature": "unpack mismatch: got 0, want 2",
-      "filesBlocked": 1,
-      "assertionsBlocked": 327,
-      "examples": [
-        {
-          "file": "math.star",
-          "error": "math.star:9:1: unpack mismatch: got 0, want 2"
-        }
-      ]
-    },
-    {
-      "signature": "args is not iterable",
-      "filesBlocked": 5,
-      "assertionsBlocked": 221,
-      "examples": [
-        {
-          "file": "int.star",
-          "error": "args is not iterable"
-        },
-        {
-          "file": "module.star",
-          "error": "args is not iterable"
-        },
-        {
-          "file": "recursion.star",
-          "error": "args is not iterable"
-        }
-      ]
-    },
-    {
       "signature": "object has no attribute .<attr>",
       "filesBlocked": 1,
       "assertionsBlocked": 90,
@@ -112,48 +57,56 @@
           "error": "time.star:6:26: object has no attribute .parse_time"
         }
       ]
+    },
+    {
+      "signature": "\"object\" != \"module\"",
+      "filesBlocked": 1,
+      "assertionsBlocked": 7,
+      "examples": [
+        {
+          "file": "module.star",
+          "error": "\"object\" != \"module\""
+        }
+      ]
     }
   ],
   "rankedFiles": [
     {
       "file": "math.star",
-      "assertionsAvailable": 327,
+      "assertionsAvailable": 284,
       "featureCost": 21,
-      "value": 15.57,
-      "status": "error",
-      "topFailures": [],
-      "error": "math.star:9:1: unpack mismatch: got 0, want 2"
-    },
-    {
-      "file": "float.star",
-      "assertionsAvailable": 327,
-      "featureCost": 44,
-      "value": 7.43,
-      "status": "error",
+      "value": 13.52,
+      "status": "partial",
       "topFailures": [
-        "\"f\" != \"l\""
+        "regular expression (cannot convert float infinity to integer) did not match error (fn is not a function)",
+        "regular expression (cannot convert float infinity to integer) did not match error (fn is not a function)",
+        "regular expression (cannot convert float NaN to integer) did not match error (fn is not a function)"
       ],
-      "error": "Cannot read properties of undefined (reading 'msg')"
+      "error": "math.star:76:11: object has no attribute .mod"
     },
     {
       "file": "string.star",
-      "assertionsAvailable": 340,
+      "assertionsAvailable": 336,
       "featureCost": 50,
-      "value": 6.8,
+      "value": 6.72,
       "status": "partial",
       "topFailures": [
-        "97.0 != 8.0"
+        "b\"a\\bc\" != \"a\\\\bc\""
       ],
-      "error": "Cannot read properties of undefined (reading 'msg')"
+      "error": "Invalid count value: -1"
     },
     {
-      "file": "int.star",
-      "assertionsAvailable": 174,
-      "featureCost": 36,
-      "value": 4.83,
-      "status": "error",
-      "topFailures": [],
-      "error": "args is not iterable"
+      "file": "float.star",
+      "assertionsAvailable": 277,
+      "featureCost": 44,
+      "value": 6.3,
+      "status": "partial",
+      "topFailures": [
+        "regular expression (has no len) did not match error (fn is not a function)",
+        "regular expression (float value is not iterable) did not match error (fn is not a function)",
+        "assertion failed"
+      ],
+      "error": "float.star:124:17: unknown or unsupported binary op % for float and float"
     },
     {
       "file": "time.star",
@@ -163,6 +116,15 @@
       "status": "error",
       "topFailures": [],
       "error": "time.star:6:26: object has no attribute .parse_time"
+    },
+    {
+      "file": "int.star",
+      "assertionsAvailable": 122,
+      "featureCost": 36,
+      "value": 3.39,
+      "status": "partial",
+      "topFailures": [],
+      "error": "int.star:74:7: unknown or unsupported binary op % for float and int"
     },
     {
       "file": "builtins.star",
@@ -183,17 +145,17 @@
       "error": "dict.star:220:4: got NEWLINE, want primary expression"
     },
     {
-      "file": "set.star",
-      "assertionsAvailable": 112,
+      "file": "list.star",
+      "assertionsAvailable": 89,
       "featureCost": 37,
-      "value": 3.03,
+      "value": 2.41,
       "status": "partial",
       "topFailures": [
-        "\"s\" != \"e\"",
-        "\"s\" != \"e\"",
-        "1 != 3"
+        "regular expression (list index -4 out of range \\[-3:2]) did not match error (fn is not a function)",
+        "regular expression (list index 3 out of range \\[-3:2]) did not match error (fn is not a function)",
+        "regular expression (out of range) did not match error (fn is not a function)"
       ],
-      "error": "args is not iterable"
+      "error": "list.star:55:13: unknown or unsupported binary op * for int and list"
     }
   ]
 }

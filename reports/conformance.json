@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-13T06:10:04.933Z",
+  "generatedAt": "2026-08-13T06:12:35.735Z",
   "implementationPresent": true,
   "ladder": {
     "total": 51,
-    "passed": 48,
-    "rate": 0.9411764705882353,
+    "passed": 49,
+    "rate": 0.9607843137254902,
     "byTier": [
       {
         "tier": 1,
@@ -34,16 +34,10 @@
       {
         "tier": 6,
         "total": 7,
-        "passed": 4
+        "passed": 5
       }
     ],
     "failures": [
-      {
-        "tier": 6,
-        "name": "call predeclared native fn",
-        "ok": false,
-        "detail": "threw: Cannot mix BigInt and other types, use explicit conversions"
-      },
       {
         "tier": 6,
         "name": "fail() halts",
@@ -60,10 +54,10 @@
   },
   "conformance": {
     "filesTotal": 22,
-    "filesPassed": 0,
-    "assertionsTotal": 47,
-    "assertionsPassed": 25,
-    "rate": 0.5319148936170213,
+    "filesPassed": 1,
+    "assertionsTotal": 332,
+    "assertionsPassed": 261,
+    "rate": 0.786144578313253,
     "files": [
       {
         "file": "assign.star",
@@ -83,12 +77,10 @@
       {
         "file": "bool.star",
         "status": "partial",
-        "assertionsPassed": 8,
-        "assertionsFailed": 1,
-        "error": "args is not iterable",
-        "failures": [
-          "False != True"
-        ]
+        "assertionsPassed": 13,
+        "assertionsFailed": 0,
+        "error": "cannot compare bool and bool",
+        "failures": []
       },
       {
         "file": "builtins.star",
@@ -100,26 +92,27 @@
       },
       {
         "file": "bytes.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 4,
-        "error": "args is not iterable",
+        "status": "partial",
+        "assertionsPassed": 19,
+        "assertionsFailed": 7,
+        "error": "bytes.star:51:15: cannot slice bytes",
         "failures": [
-          "104.0 != 101.0",
-          "65.0 != 66.0",
-          "65.0 != 66.0",
-          "240.0 != 159.0"
+          "b\"hello, ä¸\" != b\"hello, ä¸ï¿½ï¿½\"",
+          "regular expression (at index 0, 300 out of range .want value in unsigned 8-bit range) did not match error (fn is not a function)",
+          "regular expression (at index 0, got bytes, want int) did not match error (fn is not a function)",
+          "regular expression (want string, bytes, or iterable of ints) did not match error (fn is not a function)",
+          "b\"\\nÃ¿Ðï¿\" != b\"\\nÃ¿Ðð¿\"",
+          "b\"\\r\\n\\t\" != b\"\\\\r\\\\n\\\\t\"",
+          "\"104,101,108,108,111,44,32,228,184,150,231,149,140\" != \"hello, 世界\""
         ]
       },
       {
         "file": "control.star",
         "status": "partial",
-        "assertionsPassed": 3,
-        "assertionsFailed": 1,
-        "error": "args is not iterable",
-        "failures": [
-          "\"1\" != \"3\""
-        ]
+        "assertionsPassed": 7,
+        "assertionsFailed": 0,
+        "error": "undefined: fibonacci",
+        "failures": []
       },
       {
         "file": "dict.star",
@@ -132,11 +125,38 @@
       {
         "file": "float.star",
         "status": "partial",
-        "assertionsPassed": 5,
-        "assertionsFailed": 1,
-        "error": "args is not iterable",
+        "assertionsPassed": 50,
+        "assertionsFailed": 28,
+        "error": "float.star:124:17: unknown or unsupported binary op % for float and float",
         "failures": [
-          "\"f\" != \"l\""
+          "regular expression (has no len) did not match error (fn is not a function)",
+          "regular expression (float value is not iterable) did not match error (fn is not a function)",
+          "assertion failed",
+          "assertion failed",
+          "regular expression (duplicate key: 123) did not match error (fn is not a function)",
+          "2 != 1",
+          "\"x\" != \"y\"",
+          "\"0\" != \"0.0\"",
+          "\"0\" != \"0.0\"",
+          "NaN != NaN",
+          "NaN != NaN",
+          "NaN != NaN",
+          "\"NaN\" != \"nan\"",
+          "\"NaN\" != \"nan\"",
+          "NaN != NaN",
+          "NaN != NaN",
+          "NaN != NaN",
+          "\"NaN\" != \"nan\"",
+          "\"NaN\" != \"nan\"",
+          "NaN != NaN",
+          "NaN != NaN",
+          "\"NaN\" != \"nan\"",
+          "NaN != NaN",
+          "\"NaN\" != \"nan\"",
+          "\"NaN\" != \"nan\"",
+          "NaN != NaN",
+          "NaN != NaN",
+          "NaN != NaN"
         ]
       },
       {
@@ -156,10 +176,10 @@
       },
       {
         "file": "int.star",
-        "status": "error",
-        "assertionsPassed": 0,
+        "status": "partial",
+        "assertionsPassed": 52,
         "assertionsFailed": 0,
-        "error": "args is not iterable",
+        "error": "int.star:74:7: unknown or unsupported binary op % for float and int",
         "failures": []
       },
       {
@@ -173,23 +193,39 @@
       {
         "file": "list.star",
         "status": "partial",
-        "assertionsPassed": 3,
-        "assertionsFailed": 4,
-        "error": "args is not iterable",
+        "assertionsPassed": 19,
+        "assertionsFailed": 7,
+        "error": "list.star:55:13: unknown or unsupported binary op * for int and list",
         "failures": [
-          "1 != None",
-          "1 != None",
-          "1 != 2",
-          "assertion failed"
+          "regular expression (list index -4 out of range \\[-3:2]) did not match error (fn is not a function)",
+          "regular expression (list index 3 out of range \\[-3:2]) did not match error (fn is not a function)",
+          "regular expression (out of range) did not match error (fn is not a function)",
+          "regular expression (cannot assign to element of frozen list) did not match error (fn is not a function)",
+          "evaluation succeeded unexpectedly (want error matching \"cannot clear frozen list\")",
+          "regular expression (unknown.*list \\+ tuple) did not match error (fn is not a function)",
+          "regular expression (unknown.*tuple \\+ list) did not match error (fn is not a function)"
         ]
       },
       {
         "file": "math.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "args is not iterable",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 43,
+        "assertionsFailed": 12,
+        "error": "math.star:76:11: object has no attribute .mod",
+        "failures": [
+          "regular expression (cannot convert float infinity to integer) did not match error (fn is not a function)",
+          "regular expression (cannot convert float infinity to integer) did not match error (fn is not a function)",
+          "regular expression (cannot convert float NaN to integer) did not match error (fn is not a function)",
+          "regular expression (got string, want float or int) did not match error (fn is not a function)",
+          "NaN != NaN",
+          "NaN != NaN",
+          "NaN != NaN",
+          "regular expression (got string, want float or int) did not match error (fn is not a function)",
+          "regular expression (cannot convert float infinity to integer) did not match error (fn is not a function)",
+          "regular expression (cannot convert float infinity to integer) did not match error (fn is not a function)",
+          "regular expression (cannot convert float NaN to integer) did not match error (fn is not a function)",
+          "regular expression (got string, want float or int) did not match error (fn is not a function)"
+        ]
       },
       {
         "file": "misc.star",
@@ -201,14 +237,17 @@
       },
       {
         "file": "module.star",
-        "status": "error",
+        "status": "fail",
         "assertionsPassed": 0,
-        "assertionsFailed": 3,
-        "error": "args is not iterable",
+        "assertionsFailed": 7,
         "failures": [
-          "\"o\" != \"b\"",
-          "\"[\" != \"o\"",
-          "\"__starlarkModule__\" != \"members\""
+          "\"object\" != \"module\"",
+          "\"[object Object]\" != \"<module \\\"assert\\\">\"",
+          "[\"__starlarkModule__\", \"members\"] != [\"contains\", \"eq\", \"fail\", \"fails\", \"lt\", \"ne\", \"true\"]",
+          "regular expression (unhashable: module) did not match error (fn is not a function)",
+          "regular expression (can't assign to .foo field of module) did not match error (fn is not a function)",
+          "regular expression (module has no .nonesuch field or method$) did not match error (fn is not a function)",
+          "regular expression (module has no .falls field or method .did you mean .fails\\?) did not match error (fn is not a function)"
         ]
       },
       {
@@ -227,36 +266,37 @@
       },
       {
         "file": "recursion.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "args is not iterable",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 1,
+        "assertionsFailed": 1,
+        "failures": [
+          "regular expression (Starlark stack overflow) did not match error (fn is not a function)"
+        ]
       },
       {
         "file": "set.star",
         "status": "partial",
-        "assertionsPassed": 1,
-        "assertionsFailed": 6,
-        "error": "args is not iterable",
+        "assertionsPassed": 25,
+        "assertionsFailed": 7,
+        "error": "set.star:75:15: set has no attribute .update",
         "failures": [
-          "\"s\" != \"e\"",
-          "\"s\" != \"e\"",
-          "1 != 3",
-          "\"s\" != \"e\"",
-          "\"h\" != \"e\"",
-          "0 != 1"
+          "regular expression (got int, want iterable) did not match error (fn is not a function)",
+          "regular expression (got 3 arguments) did not match error (fn is not a function)",
+          "regular expression (unhashable type: dict) did not match error (fn is not a function)",
+          "regular expression (unknown.*: set \\+ set) did not match error (fn is not a function)",
+          "regular expression (unknown binary op: set | list) did not match error (fn is not a function)",
+          "regular expression (unhashable type: dict) did not match error (fn is not a function)",
+          "regular expression (argument #1 is not iterable: int) did not match error (fn is not a function)"
         ]
       },
       {
         "file": "string.star",
         "status": "partial",
-        "assertionsPassed": 4,
-        "assertionsFailed": 2,
+        "assertionsPassed": 5,
+        "assertionsFailed": 1,
         "error": "Invalid count value: -1",
         "failures": [
-          "97.0 != 8.0",
-          "\"a\" != \"b\""
+          "b\"a\\bc\" != \"a\\\\bc\""
         ]
       },
       {
@@ -270,17 +310,18 @@
       {
         "file": "tuple.star",
         "status": "partial",
-        "assertionsPassed": 1,
-        "assertionsFailed": 0,
-        "error": "args is not iterable",
-        "failures": []
+        "assertionsPassed": 24,
+        "assertionsFailed": 1,
+        "error": "tuple.star:43:15: unknown or unsupported binary op * for tuple and int",
+        "failures": [
+          "regular expression (got int, want iterable) did not match error (fn is not a function)"
+        ]
       },
       {
         "file": "while.star",
-        "status": "error",
-        "assertionsPassed": 0,
+        "status": "pass",
+        "assertionsPassed": 3,
         "assertionsFailed": 0,
-        "error": "args is not iterable",
         "failures": []
       }
     ]
