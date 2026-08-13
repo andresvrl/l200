@@ -34,16 +34,7 @@ from google.adk.plugins.bigquery_agent_analytics_plugin import (
 )
 from google.cloud import bigquery
 
-from .plugins import ObservabilityPlugin
-from .tools import (
-    edit_ported_typescript_module,
-    list_upstream_go_modules,
-    read_ported_typescript_module,
-    read_upstream_go_source,
-    restore_best_port,
-    verify_ported_interpreter,
-    write_ported_typescript_module,
-)
+from .plugins import GuardrailPlugin, ObservabilityPlugin, build_tools
 
 
 MODEL = "gemini-3.6-flash"
@@ -112,15 +103,7 @@ root_agent = Agent(
         retry_options=types.HttpRetryOptions(attempts=3),
     ),
     instruction=SKELETON_INSTRUCTION,
-    tools=[
-        verify_ported_interpreter,
-        list_upstream_go_modules,
-        read_upstream_go_source,
-        write_ported_typescript_module,
-        read_ported_typescript_module,
-        edit_ported_typescript_module,
-        restore_best_port,
-    ],
+    tools=build_tools(),
 )
 import os
 
@@ -149,10 +132,11 @@ if _project_id:
     except Exception as e:
         logging.warning(f"Failed to initialize BigQuery Analytics: {e}")
 
-# ObservabilityPlugin goes first so it records the intent of a tool call before any
-# other plugin can alter or block it.
+# Plugin order is meaningful. Observability goes first so it records the INTENT of a call
+# before the guardrail can block it -- a refused call is exactly the one worth having in
+# the log, and a plugin that only sees permitted calls cannot show you what was stopped.
 app = App(
     root_agent=root_agent,
     name="app",
-    plugins=[ObservabilityPlugin(), *_plugins],
+    plugins=[ObservabilityPlugin(), GuardrailPlugin(), *_plugins],
 )

@@ -14,6 +14,7 @@
 
 """Runner-wide plugins. Attached to the App, they wrap every agent beneath it."""
 
+from .guardrails import GuardrailPlugin, build_tools
 from .observability import ObservabilityPlugin
 
-__all__ = ["ObservabilityPlugin"]
+__all__ = ["GuardrailPlugin", "ObservabilityPlugin", "build_tools"]
