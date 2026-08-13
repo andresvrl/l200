@@ -22,6 +22,7 @@ increment that had already succeeded. Both are covered below.
 from __future__ import annotations
 
 import asyncio
+import inspect
 from types import SimpleNamespace
 
 import pytest
@@ -30,17 +31,33 @@ from app.memory import MEMORY_TOPIC, _distil, remember_port_conventions
 
 
 class _FakeContext:
-    """Stands in for an ADK callback context, recording what memory received."""
+    """Stands in for an ADK callback context, recording what memory received.
+
+    ``add_memory`` is async here because it is async in ADK. An earlier synchronous
+    version of this double let a real bug through: the production code called it without
+    awaiting, which produces a coroutine object and no memory, and raises nothing. The
+    tests passed and the memory silently never arrived. A double that is easier to use
+    than the real thing tests the double.
+    """
 
     def __init__(self, state: dict | None = None, fail: bool = False) -> None:
         self.state = state or {}
         self.written: list = []
         self._fail = fail
 
-    def add_memory(self, *, memories, custom_metadata=None) -> None:
+    async def add_memory(self, *, memories, custom_metadata=None) -> None:
         if self._fail:
             raise RuntimeError("memory bank unavailable")
         self.written.extend(memories)
+
+
+def test_the_double_matches_the_real_adk_interface() -> None:
+    # The guard against the failure above recurring: if ADK's add_memory is async, ours
+    # must be too, or these tests stop testing the code that actually runs.
+    from google.adk.agents.callback_context import CallbackContext
+
+    assert inspect.iscoroutinefunction(CallbackContext.add_memory)
+    assert inspect.iscoroutinefunction(_FakeContext.add_memory)
 
 
 async def _drain() -> None:

@@ -52,6 +52,11 @@ _MUTATING_TOOLS = frozenset(
 _PROTECTED = ("harness/", "vendor/", "reports/", "app/", "tests/", "deployment/")
 
 
+def _is_path_argument(name: str) -> bool:
+    """Whether a tool argument names a filesystem location rather than content."""
+    return name == "path" or name.endswith("_path")
+
+
 class GuardrailPlugin(BasePlugin):
     """Refuses actions that are never acceptable, before the tool runs.
 
@@ -92,8 +97,11 @@ class GuardrailPlugin(BasePlugin):
         if tool.name not in _MUTATING_TOOLS:
             return None
 
-        for value in tool_args.values():
-            if not isinstance(value, str):
+        for name, value in tool_args.items():
+            # Only arguments that ARE paths. Scanning every string would also scan
+            # source_code, and a module containing the comment `// see ../syntax/scanner.ts`
+            # would be refused as a path escape -- a guardrail that blocks correct work.
+            if not _is_path_argument(name) or not isinstance(value, str):
                 continue
             normalised = value.replace("\\", "/").lstrip("./")
             if normalised.startswith(_PROTECTED) or ".." in pathlib.PurePosixPath(value).parts:

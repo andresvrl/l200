@@ -97,6 +97,22 @@ def test_non_string_arguments_do_not_crash_the_check(plugin) -> None:
                    line_number=42, dry_run=True) is None
 
 
+@pytest.mark.parametrize(
+    "source",
+    [
+        "// ported from ../syntax/scan.go — see harness/contract.ts for the interface\n",
+        'const upstream = "vendor/starlark-go/starlark/int.go";\n',
+        "/* mirrors app/tools behaviour */ export const x = 1;\n",
+    ],
+)
+def test_protected_names_inside_source_code_are_not_path_escapes(plugin, source) -> None:
+    # The check reads path ARGUMENTS, not file contents. Scanning every string would refuse
+    # a correct module for mentioning the harness in a comment, which is both legitimate
+    # and common when porting -- upstream references belong in the code.
+    assert _before(plugin, "write_ported_typescript_module",
+                   relative_path="syntax/scanner.ts", source_code=source) is None
+
+
 # --- regressions block, they do not warn ------------------------------------
 
 

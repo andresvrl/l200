@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-13T06:46:14.174Z",
+  "generatedAt": "2026-08-13T07:30:54.200Z",
   "implementationPresent": true,
   "ladder": {
     "total": 51,
@@ -55,9 +55,9 @@
   "conformance": {
     "filesTotal": 22,
     "filesPassed": 1,
-    "assertionsTotal": 482,
-    "assertionsPassed": 358,
-    "rate": 0.7427385892116183,
+    "assertionsTotal": 484,
+    "assertionsPassed": 359,
+    "rate": 0.7417355371900827,
     "files": [
       {
         "file": "assign.star",
@@ -357,11 +357,13 @@
       },
       {
         "file": "time.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "time.star:6:26: object has no attribute .parse_time",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 1,
+        "assertionsFailed": 1,
+        "error": "cannot parse time string \"2020-06-26T17:38:36.123456789\" with format \"2006-01-02T15:04:05.999999999\"",
+        "failures": [
+          "2260-06-26 17:38:36. UTC != 2260-06-26 17:38:36. UTC"
+        ]
       },
       {
         "file": "tuple.star",

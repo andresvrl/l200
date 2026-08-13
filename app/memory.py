@@ -57,7 +57,10 @@ _IN_FLIGHT: set[asyncio.Task[Any]] = set()
 async def _write_conventions(callback_context: Any, note: str) -> None:
     """Performs the actual memory write. Never raises into the caller's turn."""
     try:
-        callback_context.add_memory(
+        # add_memory is a coroutine. Calling it without awaiting produces a coroutine
+        # object, a RuntimeWarning, and no memory -- silently, since nothing raises. Found
+        # by running a real increment, not by the tests, whose fake context was synchronous.
+        await callback_context.add_memory(
             memories=[
                 MemoryEntry(
                     author="porter",
