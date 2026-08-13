@@ -1,11 +1,34 @@
+# Metrics for the port agent.
+#
+# Two axes, deliberately different in kind:
+#
+#   method_adherence         deterministic, reads the TRAJECTORY. Did the agent measure
+#                            before it changed anything, leave the oracle alone, and only
+#                            quote numbers it actually earned? Same trace, same score,
+#                            every time.
+#
+#   custom_response_quality  LLM judge, reads the ANSWER. Is the reply accurate, relevant
+#                            and clear?
+#
+# The judge cannot see the failure this project actually risks -- an agent that edits
+# confidently without measuring and then reports a number it did not earn reads perfectly
+# well. Hence a code metric alongside it.
+
 metrics_to_run:
+  - method_adherence
   - custom_response_quality
 
 custom_metrics:
-  # Default: local LLM-as-judge (see response_quality.py). Runs in-process via
-  # google-genai on Agent Platform (ADC) or Google AI Studio (GEMINI_API_KEY).
+  # Deterministic trajectory check. See method_adherence.py for the three rules, which are
+  # taken directly from the constitution in app/prompts.py.
+  - name: method_adherence
+    custom_function_file: method_adherence.py
+
+  # Local LLM-as-judge (see response_quality.py). Runs in-process via google-genai on
+  # Agent Platform (ADC) or Google AI Studio (GEMINI_API_KEY).
   - name: custom_response_quality
     custom_function_file: response_quality.py
+
   - name: agent_turn_count
     custom_function: |
       def evaluate(instance):

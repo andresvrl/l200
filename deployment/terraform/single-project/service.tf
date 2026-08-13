@@ -101,9 +101,24 @@ resource "google_vertex_ai_reasoning_engine" "app" {
         value = google_storage_bucket.logs_data_bucket.name
       }
       env {
-        name  = "BQ_ANALYTICS_CONNECTION_ID"
+        name = "BQ_ANALYTICS_CONNECTION_ID"
         # Format: {location}.{connection_id}
         value = "${var.region}.${google_bigquery_connection.genai_telemetry_connection.connection_id}"
+      }
+
+      # Injected by reference, never by value: the runtime resolves the secret at start-up,
+      # so the credential is absent from this resource, from Terraform state, and from any
+      # log of the deployment. Created only when var.gemini_api_key_secret_id is set --
+      # see secrets.tf. The default deployment uses ADC and has no secret at all.
+      dynamic "secret_env" {
+        for_each = local.use_api_key_secret ? [1] : []
+        content {
+          name = "GEMINI_API_KEY"
+          secret_ref {
+            secret  = google_secret_manager_secret.gemini_api_key[0].secret_id
+            version = "latest"
+          }
+        }
       }
     }
 

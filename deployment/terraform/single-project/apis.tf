@@ -13,7 +13,7 @@
 # limitations under the License.
 
 locals {
-  services = [
+  services = concat([
     "aiplatform.googleapis.com",
     "cloudbuild.googleapis.com",
     "run.googleapis.com",
@@ -24,7 +24,11 @@ locals {
     "logging.googleapis.com",
     "cloudtrace.googleapis.com",
     "telemetry.googleapis.com",
-  ]
+    # Secret Manager is enabled only for the AI Studio path, which is the one configuration
+    # that needs a stored credential. The default deployment authenticates with the
+    # attached service account and has no secret to manage. Appended last so enabling it
+    # does not renumber the existing count-indexed resources.
+    ], var.gemini_api_key_secret_id != "" ? ["secretmanager.googleapis.com"] : [])
 }
 
 resource "google_project_service" "services" {

@@ -55,3 +55,15 @@ variable "app_sa_roles" {
     "roles/bigquery.jobUser",
   ]
 }
+
+variable "gemini_api_key_secret_id" {
+  type        = string
+  description = <<-EOT
+    Secret Manager secret ID holding a Google AI Studio API key, for deployments that use
+    AI Studio instead of Vertex AI. Leave empty (the default) to authenticate with the
+    attached service account through Application Default Credentials, which needs no
+    secret at all. Terraform creates the secret container but never a version, so no
+    credential material reaches Terraform state.
+  EOT
+  default     = ""
+}

@@ -58,6 +58,29 @@ jobs:
       - name: Run unit tests
         run: uv run pytest tests/unit
 
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install harness dependencies
+        run: npm ci
+
+      # Validates the ORACLE, not the port. A deliberately incompetent interpreter that
+      # only handles literal assignment must score exactly 8 of 51 probes. Too low and the
+      # harness has stopped detecting correct behaviour; too high and it is giving marks
+      # away. A conformance number from an unvalidated harness is not evidence, and this
+      # check has already caught one real defect -- every expectError probe was passing on
+      # any error at all, including a parse failure.
+      - name: Validate the conformance oracle
+        run: npm run selftest
+
+      # The committed conformance snapshot may not go backwards. Compared PER ITEM rather
+      # than on totals: an aggregate check is defeated by a change that gains more than it
+      # loses, which happened here at 40 -> 46 probes while two builtins silently broke.
+      - name: Conformance regression gate
+        run: uv run python harness/report.py --check-regression reports/baseline-step3.json
+
       - name: Run integration tests
         # Integration tests run the agent in-process; pytest doesn't load .env.
         env:
