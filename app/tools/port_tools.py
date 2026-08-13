@@ -461,21 +461,6 @@ def verify_ported_interpreter() -> dict[str, Any]:
         "ranked_files": report["rankedFiles"],
     }
 
-    # Snapshot the best port automatically, and warn loudly when a change lost ground --
-    # a local win with a global blast radius is the failure mode this catches.
-    is_best = _snapshot_if_best(report)
-    result["is_best_so_far"] = is_best
-    if not is_best and BEST_REPORT.exists():
-        best = json.loads(BEST_REPORT.read_text())
-        best_a, best_p = _score(best)
-        now_a, now_p = _score(report)
-        if now_a < best_a:
-            result["regression_warning"] = (
-                f"This version earns {now_a} assertions; the best recorded is {best_a} "
-                f"({best_a - now_a} lost). Consider restore_best_port and a smaller step."
-            )
-    return result
-
     # Type checking can pass while the module still fails to LOAD -- most often an import
     # that Node's ESM loader cannot resolve. Surfacing the loader's own message is the
     # difference between a fixable error and an unexplained zero.
@@ -487,4 +472,18 @@ def verify_ported_interpreter() -> dict[str, Any]:
             "missing its '.js' extension: Node ESM requires `from './eval.js'`, not "
             "`from './eval'`. Fix the imports and verify again."
         )
+
+    # Snapshot the best port automatically, and warn loudly when a change lost ground --
+    # a local win with a global blast radius is the failure mode this catches.
+    is_best = _snapshot_if_best(report)
+    result["is_best_so_far"] = is_best
+    if not is_best and BEST_REPORT.exists():
+        best = json.loads(BEST_REPORT.read_text())
+        best_a, _ = _score(best)
+        now_a, _ = _score(report)
+        if now_a < best_a:
+            result["regression_warning"] = (
+                f"This version earns {now_a} assertions; the best recorded is {best_a} "
+                f"({best_a - now_a} lost). Consider restore_best_port and a smaller step."
+            )
     return result

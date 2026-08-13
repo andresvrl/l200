@@ -23,6 +23,7 @@ the tool schemas the model actually sees.
 from __future__ import annotations
 
 import inspect
+import json
 import re
 
 import pytest
@@ -137,6 +138,55 @@ def test_missing_module_suggests_valid_alternatives() -> None:
     result = port_tools.read_upstream_go_source("syntax/nosuchfile.go")
     assert result["error_code"] == "module_not_found"
     assert result["available_paths"], "should suggest paths that do exist"
+
+
+# --- verification results ---------------------------------------------------
+# verify_ported_interpreter shells out, so these fake the three subprocesses to test the
+# result assembly on its own. Worth doing: a `return` sitting above the load-error branch
+# made that branch unreachable, and no test noticed because none exercised it.
+
+
+def _fake_verify_run(monkeypatch, tmp_path, gap_report: dict) -> None:
+    """Stubs tsc, the conformance runner, and the gap report as all succeeding."""
+    import subprocess
+
+    def fake_run(cmd, **kwargs):
+        stdout = json.dumps(gap_report) if "report.py" in " ".join(cmd) else ""
+        return subprocess.CompletedProcess(cmd, returncode=0, stdout=stdout, stderr="")
+
+    monkeypatch.setattr(port_tools.subprocess, "run", fake_run)
+    monkeypatch.setattr(port_tools, "_snapshot_if_best", lambda report: False)
+    monkeypatch.setattr(port_tools, "BEST_REPORT", tmp_path / "absent.json")
+
+
+_EMPTY_GAP = {
+    "implementationPresent": True,
+    "implementationNote": None,
+    "ladder": {"highestCleanTier": 0, "nextTier": 1, "passed": 0, "total": 51},
+    "conformance": {"assertionsPassed": 0, "assertionsSeen": 0, "filesPassed": 0, "filesTotal": 22},
+    "immediateWork": [],
+    "conformanceBlockers": [],
+    "rankedFiles": [],
+}
+
+
+def test_a_port_that_typechecks_but_cannot_load_says_why(monkeypatch, tmp_path) -> None:
+    # The worst failure mode in this project: every probe scores zero and the report looks
+    # like the port is simply wrong, when in fact Node could not import it.
+    gap = dict(_EMPTY_GAP, implementationPresent=False,
+               implementationNote="Cannot find module '/repo/dist/ported/eval'")
+    _fake_verify_run(monkeypatch, tmp_path, gap)
+
+    result = port_tools.verify_ported_interpreter()
+    assert result["typecheck_passed"] is True
+    assert result["implementation_loaded"] is False
+    assert "Cannot find module" in result["load_error"]
+    assert ".js" in result["recovery_hint"], "the hint must name the actual cause"
+
+
+def test_a_loading_port_reports_no_load_error(monkeypatch, tmp_path) -> None:
+    _fake_verify_run(monkeypatch, tmp_path, _EMPTY_GAP)
+    assert "load_error" not in port_tools.verify_ported_interpreter()
 
 
 # --- tool schemas -----------------------------------------------------------
