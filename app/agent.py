@@ -34,6 +34,7 @@ from google.adk.plugins.bigquery_agent_analytics_plugin import (
 )
 from google.cloud import bigquery
 
+from .plugins import ObservabilityPlugin
 from .tools import (
     edit_ported_typescript_module,
     list_upstream_go_modules,
@@ -148,8 +149,10 @@ if _project_id:
     except Exception as e:
         logging.warning(f"Failed to initialize BigQuery Analytics: {e}")
 
+# ObservabilityPlugin goes first so it records the intent of a tool call before any
+# other plugin can alter or block it.
 app = App(
     root_agent=root_agent,
     name="app",
-    plugins=_plugins,
+    plugins=[ObservabilityPlugin(), *_plugins],
 )

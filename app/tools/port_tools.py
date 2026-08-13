@@ -53,7 +53,12 @@ def _score(report: dict[str, Any]) -> tuple[int, int]:
 
 
 def _snapshot_if_best(report: dict[str, Any]) -> bool:
-    """Keeps a copy of the best port seen so far. Returns True if this run is the new best."""
+    """Keeps a copy of the best port seen so far. Returns True if this run is the new best.
+
+    Stores the FULL conformance report, not the summarised gap report. The two share the
+    scoring keys but only the full one carries per-probe and per-file detail, which is
+    exactly what `report.py --check-regression` needs to compare item by item.
+    """
     if BEST_REPORT.exists():
         previous = json.loads(BEST_REPORT.read_text())
         if _score(report) <= _score(previous):
@@ -63,7 +68,7 @@ def _snapshot_if_best(report: dict[str, Any]) -> bool:
         shutil.rmtree(BEST_DIR)
     shutil.copytree(PORTED, BEST_DIR)
     BEST_REPORT.parent.mkdir(parents=True, exist_ok=True)
-    BEST_REPORT.write_text(json.dumps(report, indent=2))
+    shutil.copyfile(ROOT / "reports" / "conformance.json", BEST_REPORT)
     return True
 
 

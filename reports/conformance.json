@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-13T06:38:38.839Z",
+  "generatedAt": "2026-08-13T06:46:14.174Z",
   "implementationPresent": true,
   "ladder": {
     "total": 51,
@@ -55,16 +55,16 @@
   "conformance": {
     "filesTotal": 22,
     "filesPassed": 1,
-    "assertionsTotal": 332,
-    "assertionsPassed": 261,
-    "rate": 0.786144578313253,
+    "assertionsTotal": 482,
+    "assertionsPassed": 358,
+    "rate": 0.7427385892116183,
     "files": [
       {
         "file": "assign.star",
-        "status": "error",
-        "assertionsPassed": 0,
+        "status": "partial",
+        "assertionsPassed": 3,
         "assertionsFailed": 0,
-        "error": "assign.star:16:4: got NEWLINE, want primary expression",
+        "error": "assign.star:15:1: cannot assign to ParenExpr",
         "failures": []
       },
       {
@@ -84,11 +84,13 @@
       },
       {
         "file": "builtins.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "builtins.star:232:4: got NEWLINE, want primary expression",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 7,
+        "assertionsFailed": 1,
+        "error": "undefined: abs",
+        "failures": [
+          "regular expression (int.*has no len) did not match error (fn is not a function)"
+        ]
       },
       {
         "file": "bytes.star",
@@ -116,11 +118,46 @@
       },
       {
         "file": "dict.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "dict.star:220:4: got NEWLINE, want primary expression",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 73,
+        "assertionsFailed": 35,
+        "failures": [
+          "regular expression (unknown binary op: dict \\+ dict) did not match error (fn is not a function)",
+          "\"{b: 2}\" != \"{\\\"b\\\": 2}\"",
+          "regular expression (pop: missing key) did not match error (fn is not a function)",
+          "[\"a\", \"b\", \"c\", None] != [\"a\", \"b\", \"c\", \"d\", \"e\", \"f\", \"g\", \"h\", \"i\", \"j\", \"k\"]",
+          "regular expression (duplicate key: \"bb\") did not match error (fn is not a function)",
+          "regular expression (dict: duplicate keyword arg: \"a\") did not match error (fn is not a function)",
+          "regular expression (dict: duplicate keyword arg: \"a\") did not match error (fn is not a function)",
+          "regular expression (key \"a\" not in dict) did not match error (fn is not a function)",
+          "regular expression (unhashable type: list) did not match error (fn is not a function)",
+          "regular expression (cannot insert into frozen hash table) did not match error (fn is not a function)",
+          "regular expression (key \"a\" not in dict) did not match error (fn is not a function)",
+          "evaluation succeeded unexpectedly (want error matching \"cannot clear frozen hash table\")",
+          "regular expression (cannot insert into frozen hash table) did not match error (fn is not a function)",
+          "{\"a\": 2, \"b\": 3, None: None} != {\"a\": 2, \"b\": 4, \"c\": 5}",
+          "{\"a\": 2, \"b\": 3, None: None, \"c\": 6, \"d\": 7} != {\"a\": 2, \"b\": 4, \"c\": 6, \"d\": 7}",
+          "regular expression (cannot insert into frozen hash table) did not match error (fn is not a function)",
+          "regular expression (insert.*during iteration) did not match error (fn is not a function)",
+          "regular expression (delete.*during iteration) did not match error (fn is not a function)",
+          "regular expression (insert.*during iteration) did not match error (fn is not a function)",
+          "\"{one: 1, two: 2}\" != \"{\\\"one\\\": 1, \\\"two\\\": 2}\"",
+          "\"{one: 1}\" != \"{\\\"one\\\": 1}\"",
+          "\"{one: 1, two: 2}\" != \"{\\\"one\\\": 1, \\\"two\\\": 2}\"",
+          "\"{two: 2}\" != \"{\\\"two\\\": 2}\"",
+          "\"{one: 1, two: 2, three: 3}\" != \"{\\\"one\\\": 1, \\\"two\\\": 2, \\\"three\\\": 3}\"",
+          "\"{one: 1, three: 3}\" != \"{\\\"one\\\": 1, \\\"three\\\": 3}\"",
+          "\"{one: 1}\" != \"{\\\"one\\\": 1}\"",
+          "regular expression (got NoneType, want iterable) did not match error (fn is not a function)",
+          "regular expression (got NoneType, want iterable) did not match error (fn is not a function)",
+          "regular expression (unknown binary op: dict [|] list) did not match error (fn is not a function)",
+          "{} != {\"a\": 1, \"b\": \"5\", \"c\": \"3\", 7: 4, \"e\": 6}",
+          "{8: 1, \"b\": 1, \"c\": 6} != {8: 1, \"b\": 2}",
+          "{\"d\": 7, 8: 1, \"b\": 1, \"c\": 6, (5, \"a\"): (\"c\", 8)} != {\"d\": 7}",
+          "{} != {8: 1, \"b\": 2}",
+          "{} != {\"d\": 7}",
+          "regular expression (unknown binary op: dict [|] list) did not match error (fn is not a function)"
+        ]
       },
       {
         "file": "float.star",
@@ -161,11 +198,20 @@
       },
       {
         "file": "function.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "function.star:117:4: got NEWLINE, want primary expression",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 12,
+        "assertionsFailed": 8,
+        "error": "undefined: hasfields",
+        "failures": [
+          "\"[object Object]\" != \"<function outer>\"",
+          "\"[object Object]\" != \"<function inner>\"",
+          "\"(args) => starlarkStr(args[0])\" != \"<built-in function str>\"",
+          "\"(args) => {\\n            const prefix = args[0];\\n            if (typeof prefix === \\\"string\\\")\\n                return s.startsWith(prefix);\\n            if (prefix instanceof Tuple || Array.isArray(prefix)) {\\n                return [...toIterable(prefix)].some((p) => typeof p === \\\"string\\\" && s.startsWith(p));\\n            }\\n            throw new EvalError(pos, \\\"startswith requires string or tuple of strings\\\");\\n        }\" != \"<built-in method startswith of string value>\"",
+          "regular expression (frozen list) did not match error (fn is not a function)",
+          "regular expression (function fib called recursively) did not match error (fn is not a function)",
+          "regular expression (function lambda called recursively) did not match error (fn is not a function)",
+          "regular expression (function map called recursively) did not match error (fn is not a function)"
+        ]
       },
       {
         "file": "function_param.star",
@@ -187,7 +233,7 @@
         "status": "error",
         "assertionsPassed": 0,
         "assertionsFailed": 0,
-        "error": "json.star:195:4: got NEWLINE, want primary expression",
+        "error": "undefined: json",
         "failures": []
       },
       {
@@ -229,11 +275,21 @@
       },
       {
         "file": "misc.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "misc.star:55:4: got NEWLINE, want primary expression",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 2,
+        "assertionsFailed": 9,
+        "error": "Maximum call stack size exceeded",
+        "failures": [
+          "regular expression (not impl) did not match error (fn is not a function)",
+          "regular expression (not impl) did not match error (fn is not a function)",
+          "regular expression (not impl) did not match error (fn is not a function)",
+          "regular expression (not impl) did not match error (fn is not a function)",
+          "regular expression (not impl) did not match error (fn is not a function)",
+          "regular expression (not impl) did not match error (fn is not a function)",
+          "regular expression (not impl) did not match error (fn is not a function)",
+          "regular expression (not impl) did not match error (fn is not a function)",
+          "regular expression (not impl) did not match error (fn is not a function)"
+        ]
       },
       {
         "file": "module.star",
