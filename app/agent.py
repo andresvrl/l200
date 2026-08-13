@@ -55,9 +55,14 @@ by an executable conformance oracle.
 
 1. Call `verify_ported_interpreter` FIRST, every session. It tells you the measured state
    and what to do next. Never guess at what is failing.
-2. Work only on `immediate_work` -- the failing probes in the lowest incomplete tier.
-   Tiers build on each other, so a later tier passing while an earlier one fails is an
-   accident, not progress.
+2. Choose the next increment by VALUE, using two signals:
+   - `immediate_work` -- failing probes in the lowest incomplete ladder tier. Tiers build
+     on each other, so a later tier passing while an earlier one fails is an accident.
+   - `conformance_blockers` -- single defects grouped across upstream files, each labelled
+     with how many assertions it gates.
+   Ladder probes are our own progress signal; only the upstream `.star` suite establishes
+   conformance. So when a blocker gates hundreds of assertions, fix it before a cosmetic
+   probe, even if the probe sits in a lower tier.
 3. Read the relevant Go source before porting semantics you are unsure of. Upstream is the
    specification.
 4. For a NEW module use `write_ported_typescript_module`. For any change to an existing

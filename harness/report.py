@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import json
 import pathlib
+import re
 import sys
 from typing import Any
 
@@ -68,6 +69,50 @@ def highest_clean_tier(ladder: dict[str, Any]) -> int:
         else:
             break
     return clean
+
+
+def _error_signature(message: str) -> str:
+    """Collapses a conformance error to a comparable shape.
+
+    Strips the ``file.star:line:col:`` prefix and generalises attribute names, so that
+    twenty files failing for one reason group into one actionable defect instead of
+    twenty unrelated-looking strings.
+    """
+    message = re.sub(r"^[A-Za-z0-9_./-]+[.]star:[0-9]+:[0-9]+:\s*", "", message)
+    if "attribute" in message:
+        message = re.sub(r"[.][A-Za-z_][A-Za-z0-9_]*", ".<attr>", message)
+    return message[:80]
+
+
+def find_conformance_blockers(report: dict[str, Any]) -> list[dict[str, Any]]:
+    """Groups conformance failures by root cause, ranked by assertions unlocked.
+
+    The ladder's "lowest incomplete tier" rule is the right order for building the
+    interpreter bottom-up, but it is the wrong order for earning conformance: a cosmetic
+    tier-3 gap can outrank the single defect gating every upstream file. This surfaces
+    what actually unblocks the oracle.
+    """
+    groups: dict[str, dict[str, Any]] = {}
+
+    for entry in report["conformance"]["files"]:
+        if entry["status"] not in ("error", "fail"):
+            continue
+        message = entry.get("error") or (entry["failures"][0] if entry["failures"] else "")
+        if not message:
+            continue
+
+        signature = _error_signature(message)
+        assertions, _cost = SPIKE_ESTIMATES.get(entry["file"], (0, 1))
+        group = groups.setdefault(
+            signature,
+            {"signature": signature, "filesBlocked": 0, "assertionsBlocked": 0, "examples": []},
+        )
+        group["filesBlocked"] += 1
+        group["assertionsBlocked"] += assertions
+        if len(group["examples"]) < 3:
+            group["examples"].append({"file": entry["file"], "error": message[:120]})
+
+    return sorted(groups.values(), key=lambda g: -g["assertionsBlocked"])
 
 
 def build_gap_report(report: dict[str, Any]) -> dict[str, Any]:
@@ -124,6 +169,7 @@ def build_gap_report(report: dict[str, Any]) -> dict[str, Any]:
             "filesTotal": conf["filesTotal"],
         },
         "immediateWork": immediate,
+        "conformanceBlockers": find_conformance_blockers(report)[:5],
         "rankedFiles": ranked[:8],
     }
 
@@ -143,6 +189,13 @@ def print_human(report: dict[str, Any], gap: dict[str, Any]) -> None:
             detail = f.get("detail") or ""
             print(f"  · {f['name']}: {detail[:100]}")
 
+    if gap["conformanceBlockers"]:
+        print("\nCONFORMANCE BLOCKERS (one defect, many files — fix these to earn assertions):")
+        for b in gap["conformanceBlockers"]:
+            print(f"  {b['assertionsBlocked']:>5} assertions across {b['filesBlocked']:>2} files"
+                  f"  ::  {b['signature']}")
+            print(f"        e.g. {b['examples'][0]['file']}: {b['examples'][0]['error'][:70]}")
+
     if gap["rankedFiles"]:
         print("\nHIGHEST-VALUE CONFORMANCE FILES (assertions per unit of feature cost):")
         print(f"  {'file':<22}{'avail':>7}{'cost':>6}{'value':>7}  status")
@@ -152,19 +205,48 @@ def print_human(report: dict[str, Any], gap: dict[str, Any]) -> None:
 
 
 def check_regression(current: dict[str, Any], baseline_path: pathlib.Path) -> int:
-    """Fails if conformance went backwards. The guardrail that makes the loop monotonic:
-    a patch that lowers the pass rate is rejected, no matter how good its rationale."""
-    baseline = load(baseline_path)
-    cur = current["conformance"]["assertionsPassed"]
-    base = baseline["conformance"]["assertionsPassed"]
-    cur_probes = current["ladder"]["passed"]
-    base_probes = baseline["ladder"]["passed"]
+    """Fails if anything that previously worked has stopped working.
 
-    ok = cur >= base and cur_probes >= base_probes
-    print(f"assertions : {base} -> {cur} ({cur - base:+d})")
-    print(f"probes     : {base_probes} -> {cur_probes} ({cur_probes - base_probes:+d})")
-    print("REGRESSION" if not ok else "no regression")
-    return 0 if ok else 1
+    Compares PER ITEM, not in aggregate. An aggregate gate is trivially defeated by a
+    change that gains more than it loses: during Step 3 the totals moved 40 -> 46 probes
+    and reported "no regression" while `len` and `type` had silently broken. Totals are a
+    progress metric; only per-item comparison is a safety gate.
+    """
+    baseline = load(baseline_path)
+
+    base_failing = {f["name"] for f in baseline["ladder"]["failures"]}
+    cur_failing = {f["name"] for f in current["ladder"]["failures"]}
+    broken_probes = sorted(cur_failing - base_failing)
+    fixed_probes = sorted(base_failing - cur_failing)
+
+    base_files = {f["file"]: f["assertionsPassed"] for f in baseline["conformance"]["files"]}
+    regressed_files = [
+        (f["file"], base_files[f["file"]], f["assertionsPassed"])
+        for f in current["conformance"]["files"]
+        if f["file"] in base_files and f["assertionsPassed"] < base_files[f["file"]]
+    ]
+
+    cur_a = current["conformance"]["assertionsPassed"]
+    base_a = baseline["conformance"]["assertionsPassed"]
+    cur_p = current["ladder"]["passed"]
+    base_p = baseline["ladder"]["passed"]
+
+    print(f"assertions : {base_a} -> {cur_a} ({cur_a - base_a:+d})")
+    print(f"probes     : {base_p} -> {cur_p} ({cur_p - base_p:+d})")
+    if fixed_probes:
+        print(f"fixed      : {len(fixed_probes)} probes ({', '.join(fixed_probes[:4])}"
+              f"{' …' if len(fixed_probes) > 4 else ''})")
+
+    if not broken_probes and not regressed_files:
+        print("no regression")
+        return 0
+
+    for name in broken_probes:
+        print(f"REGRESSED  : probe '{name}' passed in baseline, fails now")
+    for name, was, now in regressed_files:
+        print(f"REGRESSED  : {name} earned {was} assertions, now earns {now}")
+    print(f"\nREGRESSION — {len(broken_probes) + len(regressed_files)} item(s) went backwards")
+    return 1
 
 
 def main() -> None:

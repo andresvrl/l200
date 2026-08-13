@@ -372,6 +372,11 @@ def verify_ported_interpreter() -> dict[str, Any]:
         "ladder": report["ladder"],
         "conformance": report["conformance"],
         "immediate_work": report["immediateWork"],
+        # Root causes grouped across conformance files, ranked by assertions unlocked. The
+        # ladder's tier order builds the interpreter bottom-up but is the wrong order for
+        # earning conformance -- a cosmetic tier-3 gap can outrank the defect gating every
+        # upstream file.
+        "conformance_blockers": report["conformanceBlockers"],
         "ranked_files": report["rankedFiles"],
     }
 

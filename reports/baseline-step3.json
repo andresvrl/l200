@@ -1,0 +1,307 @@
+{
+  "generatedAt": "2026-08-13T05:44:15.191Z",
+  "implementationPresent": true,
+  "ladder": {
+    "total": 51,
+    "passed": 40,
+    "rate": 0.7843137254901961,
+    "byTier": [
+      {
+        "tier": 1,
+        "total": 8,
+        "passed": 8
+      },
+      {
+        "tier": 2,
+        "total": 10,
+        "passed": 10
+      },
+      {
+        "tier": 3,
+        "total": 11,
+        "passed": 10
+      },
+      {
+        "tier": 4,
+        "total": 7,
+        "passed": 7
+      },
+      {
+        "tier": 5,
+        "total": 8,
+        "passed": 2
+      },
+      {
+        "tier": 6,
+        "total": 7,
+        "passed": 3
+      }
+    ],
+    "failures": [
+      {
+        "tier": 3,
+        "name": "tuple literal",
+        "ok": false,
+        "detail": "x: expected (1, 2) (Tuple), got [1, 2] (list)"
+      },
+      {
+        "tier": 5,
+        "name": "def and call",
+        "ok": false,
+        "detail": "threw: probe:def and call:2:10: got INT, want NEWLINE"
+      },
+      {
+        "tier": 5,
+        "name": "positional args",
+        "ok": false,
+        "detail": "threw: probe:positional args:2:10: got IDENT, want NEWLINE"
+      },
+      {
+        "tier": 5,
+        "name": "default args",
+        "ok": false,
+        "detail": "threw: probe:default args:2:10: got IDENT, want NEWLINE"
+      },
+      {
+        "tier": 5,
+        "name": "keyword args",
+        "ok": false,
+        "detail": "threw: probe:keyword args:2:10: got IDENT, want NEWLINE"
+      },
+      {
+        "tier": 5,
+        "name": "recursion",
+        "ok": false,
+        "detail": "threw: probe:recursion:3:12: got INT, want NEWLINE"
+      },
+      {
+        "tier": 5,
+        "name": "closure over global",
+        "ok": false,
+        "detail": "threw: probe:closure over global:3:10: got IDENT, want NEWLINE"
+      },
+      {
+        "tier": 6,
+        "name": "call predeclared native fn",
+        "ok": false,
+        "detail": "threw: Cannot mix BigInt and other types, use explicit conversions"
+      },
+      {
+        "tier": 6,
+        "name": "native module member access",
+        "ok": false,
+        "detail": "threw: probe:native module member access:1:5: object has no attribute .eq"
+      },
+      {
+        "tier": 6,
+        "name": "fail() halts",
+        "ok": false,
+        "detail": "positive control failed (probe:fail() halts:control:2:10: got INT, want NEWLINE) — negative result is meaningless"
+      },
+      {
+        "tier": 6,
+        "name": "string % formatting",
+        "ok": false,
+        "detail": "threw: probe:string % formatting:1:13: unknown or unsupported binary op % for string and tuple"
+      }
+    ]
+  },
+  "conformance": {
+    "filesTotal": 22,
+    "filesPassed": 0,
+    "assertionsTotal": 0,
+    "assertionsPassed": 0,
+    "rate": 0,
+    "files": [
+      {
+        "file": "assign.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "assign.star:16:4: got NEWLINE, want primary expression",
+        "failures": []
+      },
+      {
+        "file": "benchmark.star",
+        "status": "deferred",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "failures": []
+      },
+      {
+        "file": "bool.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "bool.star:6:1: object has no attribute .true",
+        "failures": []
+      },
+      {
+        "file": "builtins.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "builtins.star:232:4: got NEWLINE, want primary expression",
+        "failures": []
+      },
+      {
+        "file": "bytes.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "undefined: bytes",
+        "failures": []
+      },
+      {
+        "file": "control.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "control.star:43:10: got IDENT, want NEWLINE",
+        "failures": []
+      },
+      {
+        "file": "dict.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "dict.star:132:10: got IDENT, want NEWLINE",
+        "failures": []
+      },
+      {
+        "file": "float.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "float.star:11:1: object has no attribute .eq",
+        "failures": []
+      },
+      {
+        "file": "function.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "function.star:14:13: got IDENT, want NEWLINE",
+        "failures": []
+      },
+      {
+        "file": "function_param.star",
+        "status": "fail",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "failures": []
+      },
+      {
+        "file": "int.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "int.star:6:1: object has no attribute .eq",
+        "failures": []
+      },
+      {
+        "file": "json.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "json.star:146:12: got IDENT, want NEWLINE",
+        "failures": []
+      },
+      {
+        "file": "list.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "list.star:167:12: got IDENT, want NEWLINE",
+        "failures": []
+      },
+      {
+        "file": "math.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "math.star:7:10: got IDENT, want NEWLINE",
+        "failures": []
+      },
+      {
+        "file": "misc.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "misc.star:55:4: got NEWLINE, want primary expression",
+        "failures": []
+      },
+      {
+        "file": "module.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "module.star:5:1: object has no attribute .eq",
+        "failures": []
+      },
+      {
+        "file": "paths.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "paths.star:44:12: got IDENT, want NEWLINE",
+        "failures": []
+      },
+      {
+        "file": "proto.star",
+        "status": "deferred",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "failures": []
+      },
+      {
+        "file": "recursion.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "recursion.star:11:10: got INT, want NEWLINE",
+        "failures": []
+      },
+      {
+        "file": "set.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "set.star:199:12: got IDENT, want NEWLINE",
+        "failures": []
+      },
+      {
+        "file": "string.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "string.star:413:12: got IDENT, want NEWLINE",
+        "failures": []
+      },
+      {
+        "file": "time.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "time.star:6:1: object has no attribute .true",
+        "failures": []
+      },
+      {
+        "file": "tuple.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "tuple.star:6:1: object has no attribute .eq",
+        "failures": []
+      },
+      {
+        "file": "while.star",
+        "status": "error",
+        "assertionsPassed": 0,
+        "assertionsFailed": 0,
+        "error": "while.star:14:9: got IDENT, want NEWLINE",
+        "failures": []
+      }
+    ]
+  }
+}

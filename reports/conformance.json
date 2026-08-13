@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-13T05:08:50.271Z",
+  "generatedAt": "2026-08-13T05:48:19.831Z",
   "implementationPresent": true,
   "ladder": {
     "total": 51,
-    "passed": 40,
-    "rate": 0.7843137254901961,
+    "passed": 46,
+    "rate": 0.9019607843137255,
     "byTier": [
       {
         "tier": 1,
@@ -19,7 +19,7 @@
       {
         "tier": 3,
         "total": 11,
-        "passed": 10
+        "passed": 9
       },
       {
         "tier": 4,
@@ -29,12 +29,12 @@
       {
         "tier": 5,
         "total": 8,
-        "passed": 2
+        "passed": 8
       },
       {
         "tier": 6,
         "total": 7,
-        "passed": 3
+        "passed": 4
       }
     ],
     "failures": [
@@ -45,73 +45,37 @@
         "detail": "x: expected (1, 2) (Tuple), got [1, 2] (list)"
       },
       {
-        "tier": 5,
-        "name": "def and call",
+        "tier": 3,
+        "name": "len builtin",
         "ok": false,
-        "detail": "threw: probe:def and call:2:10: got INT, want NEWLINE"
-      },
-      {
-        "tier": 5,
-        "name": "positional args",
-        "ok": false,
-        "detail": "threw: probe:positional args:2:10: got IDENT, want NEWLINE"
-      },
-      {
-        "tier": 5,
-        "name": "default args",
-        "ok": false,
-        "detail": "threw: probe:default args:2:10: got IDENT, want NEWLINE"
-      },
-      {
-        "tier": 5,
-        "name": "keyword args",
-        "ok": false,
-        "detail": "threw: probe:keyword args:2:10: got IDENT, want NEWLINE"
-      },
-      {
-        "tier": 5,
-        "name": "recursion",
-        "ok": false,
-        "detail": "threw: probe:recursion:3:12: got INT, want NEWLINE"
-      },
-      {
-        "tier": 5,
-        "name": "closure over global",
-        "ok": false,
-        "detail": "threw: probe:closure over global:3:10: got IDENT, want NEWLINE"
-      },
-      {
-        "tier": 6,
-        "name": "call predeclared native fn",
-        "ok": false,
-        "detail": "threw: Cannot mix BigInt and other types, use explicit conversions"
-      },
-      {
-        "tier": 6,
-        "name": "native module member access",
-        "ok": false,
-        "detail": "threw: probe:native module member access:1:5: object has no attribute .eq"
+        "detail": "x: expected 3 (bigint), got 1 (bigint)"
       },
       {
         "tier": 6,
         "name": "fail() halts",
         "ok": false,
-        "detail": "positive control failed (probe:fail() halts:control:2:10: got INT, want NEWLINE) — negative result is meaningless"
+        "detail": "error \"undefined: fail\" did not match /boom/"
       },
       {
         "tier": 6,
         "name": "string % formatting",
         "ok": false,
         "detail": "threw: probe:string % formatting:1:13: unknown or unsupported binary op % for string and tuple"
+      },
+      {
+        "tier": 6,
+        "name": "type builtin",
+        "ok": false,
+        "detail": "x: expected \"int\" (string), got \"list\" (string)"
       }
     ]
   },
   "conformance": {
     "filesTotal": 22,
-    "filesPassed": 0,
-    "assertionsTotal": 0,
-    "assertionsPassed": 0,
-    "rate": 0,
+    "filesPassed": 1,
+    "assertionsTotal": 336,
+    "assertionsPassed": 233,
+    "rate": 0.6934523809523809,
     "files": [
       {
         "file": "assign.star",
@@ -130,11 +94,13 @@
       },
       {
         "file": "bool.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "bool.star:6:1: object has no attribute .true",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 12,
+        "assertionsFailed": 1,
+        "error": "cannot compare bool and bool",
+        "failures": [
+          "[False, True, True, True, True] != [False, True, False, True, False]"
+        ]
       },
       {
         "file": "builtins.star",
@@ -146,42 +112,96 @@
       },
       {
         "file": "bytes.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "undefined: bytes",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 12,
+        "assertionsFailed": 14,
+        "error": "bytes.star:51:15: cannot slice bytes",
+        "failures": [
+          "b\"hello, ä¸\" != b\"hello, ä¸ï¿½ï¿½\"",
+          "regular expression (at index 0, 300 out of range .want value in unsigned 8-bit range) did not match error (fn is not a function)",
+          "regular expression (at index 0, got bytes, want int) did not match error (fn is not a function)",
+          "regular expression (want string, bytes, or iterable of ints) did not match error (fn is not a function)",
+          "b\"\\nÃ¿Ðï¿\" != b\"\\nÃ¿Ðð¿\"",
+          "b\"\\r\\n\\t\" != b\"\\\\r\\\\n\\\\t\"",
+          "\"list\" != \"bytes\"",
+          "1 != 13",
+          "1 != 7",
+          "1 != 0",
+          "1 != 2",
+          "1 != 3",
+          "1 != 4",
+          "\"[104,101,108,108,111,44,32,228,184,150,231,149,140]\" != \"hello, 世界\""
+        ]
       },
       {
         "file": "control.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "control.star:43:10: got IDENT, want NEWLINE",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 6,
+        "assertionsFailed": 1,
+        "error": "undefined: fibonacci",
+        "failures": [
+          "\"[1][3]\" != \"13\""
+        ]
       },
       {
         "file": "dict.star",
         "status": "error",
         "assertionsPassed": 0,
         "assertionsFailed": 0,
-        "error": "dict.star:132:10: got IDENT, want NEWLINE",
+        "error": "dict.star:220:4: got NEWLINE, want primary expression",
         "failures": []
       },
       {
         "file": "float.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "float.star:11:1: object has no attribute .eq",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 42,
+        "assertionsFailed": 36,
+        "error": "float.star:124:17: unknown or unsupported binary op % for float and float",
+        "failures": [
+          "\"list\" != \"float\"",
+          "regular expression (has no len) did not match error (fn is not a function)",
+          "regular expression (float value is not iterable) did not match error (fn is not a function)",
+          "\"list\" != \"float\"",
+          "\"list\" != \"float\"",
+          "\"list\" != \"float\"",
+          "\"list\" != \"float\"",
+          "\"list\" != \"float\"",
+          "\"list\" != \"float\"",
+          "\"list\" != \"float\"",
+          "assertion failed",
+          "assertion failed",
+          "regular expression (duplicate key: 123) did not match error (fn is not a function)",
+          "\"x\" != \"y\"",
+          "\"[0]\" != \"0.0\"",
+          "\"[0]\" != \"0.0\"",
+          "\"[-1.5557538194652854e-61]\" != \"-1.5557538194652854e-61\"",
+          "NaN != NaN",
+          "NaN != NaN",
+          "NaN != NaN",
+          "\"[NaN]\" != \"nan\"",
+          "\"[NaN]\" != \"nan\"",
+          "NaN != NaN",
+          "NaN != NaN",
+          "NaN != NaN",
+          "\"[NaN]\" != \"nan\"",
+          "\"[NaN]\" != \"nan\"",
+          "NaN != NaN",
+          "NaN != NaN",
+          "\"[NaN]\" != \"nan\"",
+          "NaN != NaN",
+          "\"[NaN]\" != \"nan\"",
+          "\"[NaN]\" != \"nan\"",
+          "NaN != NaN",
+          "NaN != NaN",
+          "NaN != NaN"
+        ]
       },
       {
         "file": "function.star",
         "status": "error",
         "assertionsPassed": 0,
         "assertionsFailed": 0,
-        "error": "function.star:14:13: got IDENT, want NEWLINE",
+        "error": "function.star:117:4: got NEWLINE, want primary expression",
         "failures": []
       },
       {
@@ -193,10 +213,10 @@
       },
       {
         "file": "int.star",
-        "status": "error",
-        "assertionsPassed": 0,
+        "status": "partial",
+        "assertionsPassed": 52,
         "assertionsFailed": 0,
-        "error": "int.star:6:1: object has no attribute .eq",
+        "error": "int.star:74:7: unknown or unsupported binary op % for float and int",
         "failures": []
       },
       {
@@ -204,24 +224,55 @@
         "status": "error",
         "assertionsPassed": 0,
         "assertionsFailed": 0,
-        "error": "json.star:146:12: got IDENT, want NEWLINE",
+        "error": "json.star:195:4: got NEWLINE, want primary expression",
         "failures": []
       },
       {
         "file": "list.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "list.star:167:12: got IDENT, want NEWLINE",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 19,
+        "assertionsFailed": 7,
+        "error": "list.star:55:13: unknown or unsupported binary op * for int and list",
+        "failures": [
+          "regular expression (list index -4 out of range \\[-3:2]) did not match error (fn is not a function)",
+          "regular expression (list index 3 out of range \\[-3:2]) did not match error (fn is not a function)",
+          "regular expression (out of range) did not match error (fn is not a function)",
+          "regular expression (cannot assign to element of frozen list) did not match error (fn is not a function)",
+          "evaluation succeeded unexpectedly (want error matching \"cannot clear frozen list\")",
+          "regular expression (unknown.*list \\+ tuple) did not match error (fn is not a function)",
+          "regular expression (unknown.*tuple \\+ list) did not match error (fn is not a function)"
+        ]
       },
       {
         "file": "math.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "math.star:7:10: got IDENT, want NEWLINE",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 33,
+        "assertionsFailed": 22,
+        "error": "math.star:76:11: object has no attribute .mod",
+        "failures": [
+          "\"list\" != \"int\"",
+          "\"list\" != \"int\"",
+          "\"list\" != \"int\"",
+          "\"list\" != \"int\"",
+          "\"list\" != \"int\"",
+          "regular expression (cannot convert float infinity to integer) did not match error (fn is not a function)",
+          "regular expression (cannot convert float infinity to integer) did not match error (fn is not a function)",
+          "regular expression (cannot convert float NaN to integer) did not match error (fn is not a function)",
+          "regular expression (got string, want float or int) did not match error (fn is not a function)",
+          "NaN != NaN",
+          "NaN != NaN",
+          "NaN != NaN",
+          "regular expression (got string, want float or int) did not match error (fn is not a function)",
+          "\"list\" != \"int\"",
+          "\"list\" != \"int\"",
+          "\"list\" != \"int\"",
+          "\"list\" != \"int\"",
+          "\"list\" != \"int\"",
+          "regular expression (cannot convert float infinity to integer) did not match error (fn is not a function)",
+          "regular expression (cannot convert float infinity to integer) did not match error (fn is not a function)",
+          "regular expression (cannot convert float NaN to integer) did not match error (fn is not a function)",
+          "regular expression (got string, want float or int) did not match error (fn is not a function)"
+        ]
       },
       {
         "file": "misc.star",
@@ -233,18 +284,24 @@
       },
       {
         "file": "module.star",
-        "status": "error",
+        "status": "fail",
         "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "module.star:5:1: object has no attribute .eq",
-        "failures": []
+        "assertionsFailed": 7,
+        "failures": [
+          "\"list\" != \"module\"",
+          "\"[[object Object]]\" != \"<module \\\"assert\\\">\"",
+          "[\"0\"] != [\"contains\", \"eq\", \"fail\", \"fails\", \"lt\", \"ne\", \"true\"]",
+          "regular expression (unhashable: module) did not match error (fn is not a function)",
+          "regular expression (can't assign to .foo field of module) did not match error (fn is not a function)",
+          "regular expression (module has no .nonesuch field or method$) did not match error (fn is not a function)",
+          "regular expression (module has no .falls field or method .did you mean .fails\\?) did not match error (fn is not a function)"
+        ]
       },
       {
         "file": "paths.star",
-        "status": "error",
+        "status": "fail",
         "assertionsPassed": 0,
         "assertionsFailed": 0,
-        "error": "paths.star:44:12: got IDENT, want NEWLINE",
         "failures": []
       },
       {
@@ -256,50 +313,67 @@
       },
       {
         "file": "recursion.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "recursion.star:11:10: got INT, want NEWLINE",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 1,
+        "assertionsFailed": 1,
+        "failures": [
+          "regular expression (Starlark stack overflow) did not match error (fn is not a function)"
+        ]
       },
       {
         "file": "set.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "set.star:199:12: got IDENT, want NEWLINE",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 20,
+        "assertionsFailed": 12,
+        "error": "set.star:75:15: set has no attribute .update",
+        "failures": [
+          "\"list\" != \"set\"",
+          "\"list\" != \"set\"",
+          "\"list\" != \"set\"",
+          "regular expression (got int, want iterable) did not match error (fn is not a function)",
+          "regular expression (got 3 arguments) did not match error (fn is not a function)",
+          "regular expression (unhashable type: dict) did not match error (fn is not a function)",
+          "regular expression (unknown.*: set \\+ set) did not match error (fn is not a function)",
+          "regular expression (unknown binary op: set | list) did not match error (fn is not a function)",
+          "\"list\" != \"set\"",
+          "\"list\" != \"set\"",
+          "regular expression (unhashable type: dict) did not match error (fn is not a function)",
+          "regular expression (argument #1 is not iterable: int) did not match error (fn is not a function)"
+        ]
       },
       {
         "file": "string.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "string.star:413:12: got IDENT, want NEWLINE",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 5,
+        "assertionsFailed": 1,
+        "error": "Invalid count value: -1",
+        "failures": [
+          "b\"a\\bc\" != \"a\\\\bc\""
+        ]
       },
       {
         "file": "time.star",
         "status": "error",
         "assertionsPassed": 0,
         "assertionsFailed": 0,
-        "error": "time.star:6:1: object has no attribute .true",
+        "error": "time.star:6:26: object has no attribute .parse_time",
         "failures": []
       },
       {
         "file": "tuple.star",
-        "status": "error",
-        "assertionsPassed": 0,
-        "assertionsFailed": 0,
-        "error": "tuple.star:6:1: object has no attribute .eq",
-        "failures": []
+        "status": "partial",
+        "assertionsPassed": 28,
+        "assertionsFailed": 1,
+        "error": "tuple.star:47:13: unknown or unsupported binary op * for int and tuple",
+        "failures": [
+          "regular expression (got int, want iterable) did not match error (fn is not a function)"
+        ]
       },
       {
         "file": "while.star",
-        "status": "error",
-        "assertionsPassed": 0,
+        "status": "pass",
+        "assertionsPassed": 3,
         "assertionsFailed": 0,
-        "error": "while.star:14:9: got IDENT, want NEWLINE",
         "failures": []
       }
     ]
