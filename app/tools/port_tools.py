@@ -100,6 +100,16 @@ def restore_best_port() -> dict[str, Any]:
     }
 
 
+def _safe_path(root: pathlib.Path, relative_path: str) -> pathlib.Path | None:
+    """Resolves ``relative_path`` under ``root``, or None if it escapes.
+
+    Every tool that touches the filesystem needs this check, so it lives in one place:
+    four hand-written copies is four chances to get it subtly wrong.
+    """
+    candidate = (root / relative_path).resolve()
+    return candidate if candidate.is_relative_to(root.resolve()) else None
+
+
 def _error(code: str, message: str, recovery_hint: str, **extra: Any) -> dict[str, Any]:
     """Builds a structured error the model can recover from."""
     return {
@@ -166,8 +176,8 @@ def read_upstream_go_source(module_path: str) -> dict[str, Any]:
             "Run `uv run python scripts/fetch_upstream.py` from the repository root, then retry.",
         )
 
-    candidate = (UPSTREAM / module_path).resolve()
-    if not candidate.is_relative_to(UPSTREAM.resolve()):
+    candidate = _safe_path(UPSTREAM, module_path)
+    if candidate is None:
         return _error(
             "path_escape",
             f"{module_path!r} resolves outside the upstream source tree.",
@@ -215,19 +225,21 @@ def write_ported_typescript_module(relative_path: str, source_code: str) -> dict
         On success, a dict with ``status`` "ok", ``path``, ``bytes_written`` and ``lines``.
         On failure, a dict with ``status`` "error" and a ``recovery_hint``.
     """
+    # Sandbox check first: escaping ported/ is more serious than a wrong extension, and
+    # it is the failure the agent most needs named accurately.
+    target = _safe_path(PORTED, relative_path)
+    if target is None:
+        return _error(
+            "path_escape",
+            f"{relative_path!r} resolves outside the ported/ directory.",
+            "Write only inside ported/. Never modify the harness, the vendored suite, or the agent.",
+        )
+
     if not relative_path.endswith(".ts"):
         return _error(
             "bad_extension",
             f"{relative_path!r} is not a TypeScript file.",
             "Use a path ending in '.ts', for example 'index.ts'.",
-        )
-
-    target = (PORTED / relative_path).resolve()
-    if not target.is_relative_to(PORTED.resolve()):
-        return _error(
-            "path_escape",
-            f"{relative_path!r} resolves outside the ported/ directory.",
-            "Write only inside ported/. Never modify the harness, the vendored suite, or the agent.",
         )
 
     if not source_code.strip():
@@ -241,7 +253,7 @@ def write_ported_typescript_module(relative_path: str, source_code: str) -> dict
     target.write_text(source_code, encoding="utf-8")
     return {
         "status": "ok",
-        "path": str(target.relative_to(ROOT)),
+        "path": relative_path,
         "bytes_written": len(source_code),
         "lines": source_code.count("\n") + 1,
     }
@@ -269,8 +281,8 @@ def edit_ported_typescript_module(
         failure, a dict with ``status`` "error", a ``recovery_hint``, and where useful an
         ``occurrences`` count so the fragment can be made unique.
     """
-    target = (PORTED / relative_path).resolve()
-    if not target.is_relative_to(PORTED.resolve()):
+    target = _safe_path(PORTED, relative_path)
+    if target is None:
         return _error(
             "path_escape",
             f"{relative_path!r} resolves outside the ported/ directory.",
@@ -306,7 +318,7 @@ def edit_ported_typescript_module(
     target.write_text(updated, encoding="utf-8")
     return {
         "status": "ok",
-        "path": str(target.relative_to(ROOT)),
+        "path": relative_path,
         "bytes_written": len(updated),
         "bytes_delta": len(updated) - len(content),
     }
@@ -326,8 +338,8 @@ def read_ported_typescript_module(relative_path: str) -> dict[str, Any]:
         ``lines``. On failure, a dict with ``status`` "error", a ``recovery_hint``, and
         ``existing_modules`` listing what has been written so far.
     """
-    target = (PORTED / relative_path).resolve()
-    if not target.is_relative_to(PORTED.resolve()):
+    target = _safe_path(PORTED, relative_path)
+    if target is None:
         return _error(
             "path_escape",
             f"{relative_path!r} resolves outside the ported/ directory.",
